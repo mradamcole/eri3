@@ -54,12 +54,24 @@
       }
 
       .demo__field input,
-      .demo__field select {
+      .demo__field select,
+      .demo__field textarea {
         font: inherit;
         padding: 0.35rem 0.5rem;
         border: 1px solid #c9d3e0;
         border-radius: 6px;
         background: #fff;
+      }
+
+      .demo__field textarea {
+        min-height: 5rem;
+        resize: vertical;
+      }
+
+      .demo__hint {
+        margin: 0;
+        font-size: 0.75rem;
+        color: #475569;
       }
 
       .demo__check {
@@ -149,6 +161,52 @@
                 <option value="depressed">depressed</option>
               </select>
             </label>
+            <label class="demo__field">
+              Tick position
+              <select id="cfgTicksPos">
+                <option value="none" selected>none</option>
+                <option value="above">above rail</option>
+                <option value="below">below rail</option>
+              </select>
+            </label>
+            <label class="demo__field">
+              Minor tick interval (%)
+              <input id="cfgTickMinor" type="number" value="5" min="0" />
+            </label>
+            <label class="demo__field">
+              Major tick interval (%)
+              <input id="cfgTickMajor" type="number" value="10" min="0" />
+            </label>
+            <label class="demo__field">
+              Snap mode
+              <select id="cfgSnapMode">
+                <option value="increment" selected>increment</option>
+                <option value="none">none</option>
+                <option value="minor">minor ticks</option>
+                <option value="major">major ticks</option>
+                <option value="custom">custom ticks</option>
+              </select>
+            </label>
+            <label class="demo__field">
+              Custom label size (CSS)
+              <input id="cfgTickLabelSize" type="text" value="0.62rem" />
+            </label>
+            <label class="demo__field">
+              Custom label rotation (deg)
+              <input id="cfgTickLabelRotate" type="number" value="0" />
+            </label>
+            <label class="demo__field">
+              Custom ticks JSON (value 0..1)
+              <textarea id="cfgTickCustom">[
+  { "value": 0, "label": "no THC" },
+  { "value": 0.1, "label": "low recreational" },
+  { "value": 0.3, "label": "clinical" },
+  { "value": 0.6, "label": "high recreational" }
+]</textarea>
+            </label>
+            <p class="demo__hint" id="cfgTickCustomFeedback">
+              JSON valid. Custom ticks will render.
+            </p>
             <label class="demo__check">
               <input id="cfgFillEnabled" type="checkbox" checked />
               Fill left side of knob
@@ -172,7 +230,8 @@
         var form = document.getElementById("controlsForm");
         var mount = document.getElementById("sliderMount");
         var out = document.getElementById("out");
-        if (!form || !mount || !out || !window.initPercentSliders) {
+        var tickFeedback = document.getElementById("cfgTickCustomFeedback");
+        if (!form || !mount || !out || !tickFeedback || !window.initPercentSliders) {
           return;
         }
 
@@ -187,7 +246,33 @@
           var fillEnabled = document.getElementById("cfgFillEnabled").checked;
           var fillColor = document.getElementById("cfgColor").value;
           var trackStyle = document.getElementById("cfgTrackStyle").value;
+          var ticksPos = document.getElementById("cfgTicksPos").value;
+          var tickMinor = Number(document.getElementById("cfgTickMinor").value);
+          var tickMajor = Number(document.getElementById("cfgTickMajor").value);
+          var snapMode = document.getElementById("cfgSnapMode").value;
+          var tickLabelSize = document.getElementById("cfgTickLabelSize").value.trim();
+          var tickLabelRotate = Number(
+            document.getElementById("cfgTickLabelRotate").value
+          );
+          var tickCustomRaw = document.getElementById("cfgTickCustom").value.trim();
           var knobStyle = document.getElementById("cfgStyle").value;
+          var tickCustom = [];
+          var tickCustomValid = true;
+          var tickCustomError = "";
+          if (tickCustomRaw) {
+            try {
+              var parsed = JSON.parse(tickCustomRaw);
+              if (!Array.isArray(parsed)) {
+                tickCustomValid = false;
+                tickCustomError = "JSON must be an array.";
+              } else {
+                tickCustom = parsed;
+              }
+            } catch (e) {
+              tickCustomValid = false;
+              tickCustomError = "Invalid JSON.";
+            }
+          }
           return {
             mode: mode || "single",
             min: Number.isFinite(min) ? min : 0,
@@ -199,6 +284,15 @@
             fillEnabled: fillEnabled,
             fillColor: fillColor || "#8b0000",
             trackStyle: trackStyle || "standard",
+            ticksPos: ticksPos || "none",
+            tickMinor: Number.isFinite(tickMinor) ? tickMinor : 0,
+            tickMajor: Number.isFinite(tickMajor) ? tickMajor : 0,
+            snapMode: snapMode || "increment",
+            tickLabelSize: tickLabelSize || "0.62rem",
+            tickLabelRotate: Number.isFinite(tickLabelRotate) ? tickLabelRotate : 0,
+            tickCustomJson: tickCustomValid ? JSON.stringify(tickCustom) : "[]",
+            tickCustomValid: tickCustomValid,
+            tickCustomError: tickCustomError,
             knobStyle: knobStyle || "depressed-circle",
           };
         }
@@ -220,6 +314,20 @@
           }
           if (s.valueMin > s.valueMax) {
             s.valueMin = s.valueMax;
+          }
+          if (s.tickMinor < 0) {
+            s.tickMinor = 0;
+          }
+          if (s.tickMajor < 0) {
+            s.tickMajor = 0;
+          }
+          if (!s.tickCustomValid) {
+            tickFeedback.textContent =
+              s.tickCustomError + " Using [] for render.";
+            tickFeedback.style.color = "#b91c1c";
+          } else {
+            tickFeedback.textContent = "JSON valid. Custom ticks will render.";
+            tickFeedback.style.color = "#166534";
           }
 
           var knobMarkup = isRange
@@ -264,6 +372,18 @@
             s.fillColor +
             '" data-track-style="' +
             s.trackStyle +
+            '" data-ticks="' +
+            s.ticksPos +
+            '" data-tick-minor="' +
+            s.tickMinor +
+            '" data-tick-major="' +
+            s.tickMajor +
+            '" data-snap="' +
+            s.snapMode +
+            '" data-tick-label-size="' +
+            s.tickLabelSize +
+            '" data-tick-label-rotate="' +
+            s.tickLabelRotate +
             '" data-knob-style="' +
             s.knobStyle +
             '" data-value="' +
@@ -284,6 +404,11 @@
             "</div>" +
             "</div>" +
             "</div>";
+
+          var sliderConfigNode = mount.querySelector(".percent-slider");
+          if (sliderConfigNode) {
+            sliderConfigNode.setAttribute("data-tick-custom", s.tickCustomJson);
+          }
 
           window.initPercentSliders(mount);
           var slider = mount.querySelector(".percent-slider");

@@ -67,6 +67,33 @@
     var inputMax = root.querySelector("[data-slider-input-max]");
     var rangeAttr = root.getAttribute("data-range");
     var isRange = rangeAttr === "true" || rangeAttr === "1";
+    var tickPosRaw = root.getAttribute("data-ticks") || "none";
+    var tickMinorRaw = root.getAttribute("data-tick-minor");
+    var tickMajorRaw = root.getAttribute("data-tick-major");
+    var tickCustomRaw = root.getAttribute("data-tick-custom");
+    var tickLabelSizeRaw = root.getAttribute("data-tick-label-size") || "0.62rem";
+    var tickLabelRotateRaw = parseNum(root.getAttribute("data-tick-label-rotate"), 0);
+    var snapModeRaw = root.getAttribute("data-snap") || "increment";
+    /** @type {Record<string, string>} */
+    var tickPosClassByName = {
+      none: "percent-slider--ticks-none",
+      above: "percent-slider--ticks-above",
+      below: "percent-slider--ticks-below",
+    };
+    /** @type {Record<string, boolean>} */
+    var snapModeByName = {
+      none: true,
+      increment: true,
+      minor: true,
+      major: true,
+      custom: true,
+    };
+    var snapMode = snapModeByName[snapModeRaw] ? snapModeRaw : "increment";
+    var tickPos = tickPosClassByName[tickPosRaw] ? tickPosRaw : "none";
+    var tickPosClassList = Object.keys(tickPosClassByName).map(function (k) {
+      return tickPosClassByName[k];
+    });
+    var ticksContainer = root.querySelector("[data-slider-ticks]");
 
     if (!knobMin && knobSingle) {
       knobMin = knobSingle;
@@ -77,6 +104,14 @@
 
     if (!track || !fill || !knobMin) {
       return;
+    }
+    if (!ticksContainer) {
+      ticksContainer = document.createElement("div");
+      ticksContainer.className = "percent-slider__ticks";
+      ticksContainer.setAttribute("data-slider-ticks", "");
+      if (track.parentElement) {
+        track.parentElement.appendChild(ticksContainer);
+      }
     }
 
     var min = parseNum(root.getAttribute("data-min"), 0);
@@ -124,6 +159,15 @@
     }
 
     root.style.setProperty("--percent-slider-fill", fillColor);
+    root.style.setProperty("--percent-slider-tick-label-size", tickLabelSizeRaw);
+    root.style.setProperty(
+      "--percent-slider-tick-label-rotate",
+      String(tickLabelRotateRaw) + "deg"
+    );
+    for (var tp = 0; tp < tickPosClassList.length; tp++) {
+      root.classList.remove(tickPosClassList[tp]);
+    }
+    root.classList.add(tickPosClassByName[tickPos]);
     for (var tc = 0; tc < trackClassList.length; tc++) {
       root.classList.remove(trackClassList[tc]);
     }
@@ -153,8 +197,8 @@
         root.getAttribute("data-value-max"),
         parseNum(root.getAttribute("data-value"), max)
       );
-      valueMin = snapToStep(initialMin, min, max, step);
-      valueMax = snapToStep(initialMax, min, max, step);
+      valueMin = clamp(initialMin, min, max);
+      valueMax = clamp(initialMax, min, max);
       if (valueMin > valueMax) {
         valueMin = valueMax;
       }
@@ -163,7 +207,7 @@
       if (!Number.isFinite(initial)) {
         initial = min;
       }
-      value = snapToStep(initial, min, max, step);
+      value = clamp(initial, min, max);
     }
 
     var labelId = root.getAttribute("aria-labelledby");
@@ -198,6 +242,168 @@
         return 0;
       }
       return (current - min) / (max - min);
+    }
+
+    function parseTickInterval(raw) {
+      if (raw === null || raw === undefined || raw === "") {
+        return null;
+      }
+      var n = Number(raw);
+      if (!Number.isFinite(n) || n <= 0) {
+        return null;
+      }
+      return n;
+    }
+
+    function readCustomTicks() {
+      if (!tickCustomRaw) {
+        return [];
+      }
+      var parsed;
+      try {
+        parsed = JSON.parse(tickCustomRaw);
+      } catch (e) {
+        return [];
+      }
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+      /** @type {Array<{ pct: number, label: string }>} */
+      var out = [];
+      for (var i = 0; i < parsed.length; i++) {
+        var entry = parsed[i];
+        if (!entry || typeof entry !== "object") {
+          continue;
+        }
+        var v = Number(entry.value);
+        if (!Number.isFinite(v)) {
+          continue;
+        }
+        var pct = clamp(v, 0, 1) * 100;
+        var label = "";
+        if (entry.label !== undefined && entry.label !== null) {
+          label = String(entry.label);
+        }
+        out.push({ pct: pct, label: label });
+      }
+      return out;
+    }
+
+    function tickPctToValue(pct) {
+      return min + (max - min) * (pct / 100);
+    }
+
+    function snapToNearest(valueToSnap, points) {
+      if (!points.length) {
+        return valueToSnap;
+      }
+      var best = points[0];
+      var bestDist = Math.abs(valueToSnap - points[0]);
+      for (var i = 1; i < points.length; i++) {
+        var d = Math.abs(valueToSnap - points[i]);
+        if (d < bestDist) {
+          bestDist = d;
+          best = points[i];
+        }
+      }
+      return best;
+    }
+
+    function snapByIntervalPercent(valueToSnap, intervalPct) {
+      if (intervalPct === null) {
+        return valueToSnap;
+      }
+      var valueStep = ((max - min) * intervalPct) / 100;
+      if (!(valueStep > 0)) {
+        return valueToSnap;
+      }
+      return snapToStep(valueToSnap, min, max, valueStep);
+    }
+
+    var tickMinorInterval = parseTickInterval(tickMinorRaw);
+    var tickMajorInterval = parseTickInterval(tickMajorRaw);
+    var customTicks = readCustomTicks();
+    /** @type {number[]} */
+    var customTickSnapValues = [];
+    for (var csi = 0; csi < customTicks.length; csi++) {
+      customTickSnapValues.push(tickPctToValue(customTicks[csi].pct));
+    }
+
+    function normalizeBySnapMode(next) {
+      var clamped = clamp(next, min, max);
+      if (snapMode === "none") {
+        return clamped;
+      }
+      if (snapMode === "increment") {
+        return snapToStep(clamped, min, max, step);
+      }
+      if (snapMode === "minor") {
+        return snapByIntervalPercent(clamped, tickMinorInterval);
+      }
+      if (snapMode === "major") {
+        return snapByIntervalPercent(clamped, tickMajorInterval);
+      }
+      if (snapMode === "custom") {
+        if (!customTickSnapValues.length) {
+          return clamped;
+        }
+        return clamp(snapToNearest(clamped, customTickSnapValues), min, max);
+      }
+      return clamped;
+    }
+
+    function buildIntervalTicks(interval) {
+      if (interval === null) {
+        return [];
+      }
+      /** @type {number[]} */
+      var out = [];
+      var stepCount = Math.floor(100 / interval);
+      for (var i = 0; i <= stepCount; i++) {
+        out.push(i * interval);
+      }
+      if (out.length === 0 || Math.abs(out[out.length - 1] - 100) > 0.0001) {
+        out.push(100);
+      }
+      return out;
+    }
+
+    function renderTicks() {
+      if (!ticksContainer) {
+        return;
+      }
+      ticksContainer.textContent = "";
+      if (tickPos === "none") {
+        return;
+      }
+      var minorTicks = buildIntervalTicks(tickMinorInterval);
+      var majorTicks = buildIntervalTicks(tickMajorInterval);
+
+      function addTick(type, pct, label) {
+        var clampedPct = clamp(pct, 0, 100);
+        var tickEl = document.createElement("div");
+        tickEl.className = "percent-slider__tick percent-slider__tick--" + type;
+        tickEl.style.left = clampedPct + "%";
+        ticksContainer.appendChild(tickEl);
+        if (type === "custom" && label) {
+          var labelEl = document.createElement("span");
+          labelEl.className =
+            "percent-slider__tick-label percent-slider__tick-label--custom";
+          labelEl.style.left = clampedPct + "%";
+          labelEl.textContent = label;
+          ticksContainer.appendChild(labelEl);
+        }
+      }
+
+      for (var mi = 0; mi < minorTicks.length; mi++) {
+        addTick("minor", minorTicks[mi], "");
+      }
+      for (var ma = 0; ma < majorTicks.length; ma++) {
+        addTick("major", majorTicks[ma], "");
+      }
+      for (var cu = 0; cu < customTicks.length; cu++) {
+        addTick("custom", customTicks[cu].pct, customTicks[cu].label);
+      }
     }
 
     function refreshInputs() {
@@ -276,25 +482,25 @@
     }
 
     function setSingle(next, emit) {
-      value = snapToStep(next, min, max, step);
+      value = normalizeBySnapMode(next);
       render(emit);
     }
 
     function setMin(next, emit) {
-      var snapped = snapToStep(next, min, max, step);
+      var snapped = normalizeBySnapMode(next);
       valueMin = clamp(snapped, min, valueMax);
       render(emit);
     }
 
     function setMax(next, emit) {
-      var snapped = snapToStep(next, min, max, step);
+      var snapped = normalizeBySnapMode(next);
       valueMax = clamp(snapped, valueMin, max);
       render(emit);
     }
 
     function setRange(nextMin, nextMax, emit) {
-      var snappedMin = snapToStep(nextMin, min, max, step);
-      var snappedMax = snapToStep(nextMax, min, max, step);
+      var snappedMin = normalizeBySnapMode(nextMin);
+      var snappedMax = normalizeBySnapMode(nextMax);
       valueMin = clamp(snappedMin, min, max);
       valueMax = clamp(snappedMax, min, max);
       if (valueMin > valueMax) {
@@ -560,6 +766,7 @@
       },
     };
     root.percentSlider = api;
+    renderTicks();
 
     if (isRange) {
       setRange(valueMin, valueMax, false);
