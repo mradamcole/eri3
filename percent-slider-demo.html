@@ -96,6 +96,13 @@
         <section class="demo__panel">
           <form class="demo__controls" id="controlsForm">
             <label class="demo__field">
+              Mode
+              <select id="cfgMode">
+                <option value="single" selected>single</option>
+                <option value="range">range (min + max)</option>
+              </select>
+            </label>
+            <label class="demo__field">
               Min
               <input id="cfgMin" type="number" value="0" />
             </label>
@@ -108,8 +115,16 @@
               <input id="cfgStep" type="number" value="5" min="1" />
             </label>
             <label class="demo__field">
-              Value
+              Value (single mode)
               <input id="cfgValue" type="number" value="45" />
+            </label>
+            <label class="demo__field">
+              Value min (range mode)
+              <input id="cfgValueMin" type="number" value="20" />
+            </label>
+            <label class="demo__field">
+              Value max (range mode)
+              <input id="cfgValueMax" type="number" value="70" />
             </label>
             <label class="demo__field">
               Fill color
@@ -162,19 +177,25 @@
         }
 
         function getState() {
+          var mode = document.getElementById("cfgMode").value;
           var min = Number(document.getElementById("cfgMin").value);
           var max = Number(document.getElementById("cfgMax").value);
           var step = Number(document.getElementById("cfgStep").value);
           var value = Number(document.getElementById("cfgValue").value);
+          var valueMin = Number(document.getElementById("cfgValueMin").value);
+          var valueMax = Number(document.getElementById("cfgValueMax").value);
           var fillEnabled = document.getElementById("cfgFillEnabled").checked;
           var fillColor = document.getElementById("cfgColor").value;
           var trackStyle = document.getElementById("cfgTrackStyle").value;
           var knobStyle = document.getElementById("cfgStyle").value;
           return {
+            mode: mode || "single",
             min: Number.isFinite(min) ? min : 0,
             max: Number.isFinite(max) ? max : 100,
             step: Number.isFinite(step) ? step : 5,
             value: Number.isFinite(value) ? value : 0,
+            valueMin: Number.isFinite(valueMin) ? valueMin : 0,
+            valueMax: Number.isFinite(valueMax) ? valueMax : 100,
             fillEnabled: fillEnabled,
             fillColor: fillColor || "#8b0000",
             trackStyle: trackStyle || "standard",
@@ -184,22 +205,59 @@
 
         function renderSlider() {
           var s = getState();
+          var isRange = s.mode === "range";
           if (s.max <= s.min) {
             s.max = s.min + 1;
           }
           if (s.step <= 0) {
             s.step = 1;
           }
+          if (s.valueMin < s.min) {
+            s.valueMin = s.min;
+          }
+          if (s.valueMax > s.max) {
+            s.valueMax = s.max;
+          }
+          if (s.valueMin > s.valueMax) {
+            s.valueMin = s.valueMax;
+          }
+
+          var knobMarkup = isRange
+            ? '<div class="percent-slider__knob" data-slider-knob-min><span class="percent-slider__knob-inner" aria-hidden="true"></span></div>' +
+              '<div class="percent-slider__knob" data-slider-knob-max><span class="percent-slider__knob-inner" aria-hidden="true"></span></div>'
+            : '<div class="percent-slider__knob" data-slider-knob><span class="percent-slider__knob-inner" aria-hidden="true"></span></div>';
+
+          var fieldMarkup = isRange
+            ? '<div class="percent-slider__field percent-slider__field--range">' +
+              '<div class="percent-slider__bound">' +
+              '<span class="percent-slider__bound-label">Min</span>' +
+              '<input type="number" class="percent-slider__input percent-slider__input--bound" data-slider-input-min aria-label="Minimum value" />' +
+              '<span class="percent-slider__suffix">%</span>' +
+              "</div>" +
+              '<div class="percent-slider__bound">' +
+              '<span class="percent-slider__bound-label">Max</span>' +
+              '<input type="number" class="percent-slider__input percent-slider__input--bound" data-slider-input-max aria-label="Maximum value" />' +
+              '<span class="percent-slider__suffix">%</span>' +
+              "</div>" +
+              "</div>"
+            : '<div class="percent-slider__field">' +
+              '<input type="number" class="percent-slider__input" data-slider-input aria-labelledby="demoSliderLabel" />' +
+              '<span class="percent-slider__suffix">%</span>' +
+              "</div>";
 
           mount.innerHTML =
             '<div class="percent-slider-block" role="group" aria-labelledby="demoSliderLabel">' +
-            '<span class="percent-slider-block__label" id="demoSliderLabel">Live slider demo</span>' +
+            '<span class="percent-slider-block__label" id="demoSliderLabel">Live slider demo (' +
+            (isRange ? "range" : "single") +
+            ')</span>' +
             '<div class="percent-slider" aria-labelledby="demoSliderLabel" data-min="' +
             s.min +
             '" data-max="' +
             s.max +
             '" data-step="' +
             s.step +
+            '" data-range="' +
+            (isRange ? "true" : "false") +
             '" data-fill="' +
             (s.fillEnabled ? "true" : "false") +
             '" data-fill-color="' +
@@ -210,20 +268,19 @@
             s.knobStyle +
             '" data-value="' +
             s.value +
+            '" data-value-min="' +
+            s.valueMin +
+            '" data-value-max="' +
+            s.valueMax +
             '">' +
             '<div class="percent-slider__row">' +
             '<div class="percent-slider__track-area">' +
             '<div class="percent-slider__track" data-slider-track>' +
             '<div class="percent-slider__fill" data-slider-fill></div>' +
             "</div>" +
-            '<div class="percent-slider__knob" data-slider-knob>' +
-            '<span class="percent-slider__knob-inner" aria-hidden="true"></span>' +
+            knobMarkup +
             "</div>" +
-            "</div>" +
-            '<div class="percent-slider__field">' +
-            '<input type="number" class="percent-slider__input" data-slider-input aria-labelledby="demoSliderLabel" />' +
-            '<span class="percent-slider__suffix">%</span>' +
-            "</div>" +
+            fieldMarkup +
             "</div>" +
             "</div>" +
             "</div>";
@@ -234,15 +291,16 @@
             return;
           }
           slider.addEventListener("percent-slider-change", function (ev) {
-            out.textContent = JSON.stringify({ value: ev.detail.value }, null, 2);
-            document.getElementById("cfgValue").value = String(ev.detail.value);
+            out.textContent = JSON.stringify(ev.detail, null, 2);
+            if (isRange) {
+              document.getElementById("cfgValueMin").value = String(ev.detail.min);
+              document.getElementById("cfgValueMax").value = String(ev.detail.max);
+            } else {
+              document.getElementById("cfgValue").value = String(ev.detail.value);
+            }
           });
           if (slider.percentSlider) {
-            out.textContent = JSON.stringify(
-              { value: slider.percentSlider.getValue() },
-              null,
-              2
-            );
+            out.textContent = JSON.stringify(slider.percentSlider.getValue(), null, 2);
           }
         }
 
