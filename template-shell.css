@@ -321,6 +321,7 @@ body {
 }
 
 .clinical-context__combobox-field {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -387,7 +388,7 @@ body {
   z-index: 4;
   left: 0;
   right: 0;
-  top: calc(100% + 4px);
+  top: 100%;
   margin: 0;
   padding: 0.25rem 0;
   list-style: none;

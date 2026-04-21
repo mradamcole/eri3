@@ -519,10 +519,25 @@
       panel.hidden = false;
       panel.style.left = "0px";
       panel.style.top = "0px";
-      panel.style.width = "max-content";
+      panel.style.width = "auto";
       panel.style.maxWidth = "none";
 
-      var natural = panel.offsetWidth;
+      var prevTableWidth = table.style.width;
+      var prevTableMinWidth = table.style.minWidth;
+      var prevTableLayout = table.style.tableLayout;
+      table.style.width = "max-content";
+      table.style.minWidth = "0";
+      table.style.tableLayout = "auto";
+      var measuredTableWidth = table.getBoundingClientRect().width;
+      table.style.width = prevTableWidth;
+      table.style.minWidth = prevTableMinWidth;
+      table.style.tableLayout = prevTableLayout;
+
+      var panelComputed = window.getComputedStyle(panel);
+      var borderX =
+        parseFloat(panelComputed.borderLeftWidth || "0") +
+        parseFloat(panelComputed.borderRightWidth || "0");
+      var natural = Math.ceil(measuredTableWidth + borderX);
       var availRight = window.innerWidth - MARGIN - barRect.left;
       var w = Math.min(natural, Math.max(120, availRight));
       var left = barRect.left;
