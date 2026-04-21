@@ -146,6 +146,8 @@
    * @param {number} [options.maxSelections]
    * @param {string} [options.ariaLabel]
    * @param {boolean} [options.clearFilterOnClose]
+   * @param {boolean} [options.selectAllButton]
+   * @param {boolean} [options.clearAllButton]
    * @returns {{ destroy: function (): void, getValue: function (): { id: string, cells: string[] }[], setValue: function (ids: string[]): void, open: function (): void, close: function (): void, root: HTMLElement }}
    */
   function create(container, options) {
@@ -164,6 +166,9 @@
         : Infinity;
     var ariaLabel = options.ariaLabel || "Options";
     var clearFilterOnClose = options.clearFilterOnClose === true;
+    var selectAllButtonEnabled = multiple && options.selectAllButton === true;
+    var clearAllButtonEnabled = multiple && options.clearAllButton === true;
+    var showBulk = selectAllButtonEnabled || clearAllButtonEnabled;
 
     var colCount = columns.length;
 
@@ -260,6 +265,57 @@
     bar.appendChild(inputWrap);
     bar.appendChild(toggleBtn);
 
+    /** @type {HTMLDivElement | null} */
+    var bulkWrap = null;
+    /** @type {HTMLButtonElement | null} */
+    var selectAllBtn = null;
+    /** @type {HTMLButtonElement | null} */
+    var clearAllBtn = null;
+
+    if (showBulk) {
+      root.classList.add("tmsd--bulk");
+      bulkWrap = document.createElement("div");
+      bulkWrap.className = "tmsd__bulk";
+
+      if (selectAllButtonEnabled) {
+        selectAllBtn = document.createElement("button");
+        selectAllBtn.type = "button";
+        selectAllBtn.className = "tmsd__icon-btn";
+        selectAllBtn.setAttribute("aria-label", "Select all visible options");
+        selectAllBtn.title = "Select all visible options";
+        selectAllBtn.innerHTML =
+          '<span class="tmsd__icon-btn-icon" aria-hidden="true">' +
+          '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="none">' +
+          '<path d="M2.75 2.75h10.5v10.5H2.75z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>' +
+          '<path d="M5.25 8.25 7.25 10.1 11.25 5.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+          "</svg></span>" +
+          '<span class="tmsd__icon-btn-label">All</span>';
+        selectAllBtn.addEventListener("click", function () {
+          selectAllVisible();
+        });
+        bulkWrap.appendChild(selectAllBtn);
+      }
+
+      if (clearAllButtonEnabled) {
+        clearAllBtn = document.createElement("button");
+        clearAllBtn.type = "button";
+        clearAllBtn.className = "tmsd__icon-btn";
+        clearAllBtn.setAttribute("aria-label", "Clear selection");
+        clearAllBtn.title = "Clear selection";
+        clearAllBtn.innerHTML =
+          '<span class="tmsd__icon-btn-icon" aria-hidden="true">' +
+          '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="none">' +
+          '<circle cx="8" cy="8" r="5.25" stroke="currentColor" stroke-width="1.5"/>' +
+          '<path d="M6.1 6.1 9.9 9.9M9.9 6.1 6.1 9.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' +
+          "</svg></span>" +
+          '<span class="tmsd__icon-btn-label">None</span>';
+        clearAllBtn.addEventListener("click", function () {
+          clearAllSelection();
+        });
+        bulkWrap.appendChild(clearAllBtn);
+      }
+    }
+
     var panel = document.createElement("div");
     panel.className = "tmsd__panel";
     panel.id = listId;
@@ -328,6 +384,9 @@
     panel.appendChild(panelInner);
 
     root.appendChild(bar);
+    if (bulkWrap) {
+      root.appendChild(bulkWrap);
+    }
     root.appendChild(panel);
     container.appendChild(root);
 
@@ -405,6 +464,7 @@
         setActiveRow(visibleIds[0]);
       }
       syncRowAriaSelected();
+      updateBulkActionButtons();
     }
 
     function syncRowAriaSelected() {
@@ -508,6 +568,63 @@
         pill.appendChild(rm);
         pillsWrap.appendChild(pill);
       }
+      updateBulkActionButtons();
+    }
+
+    function updateBulkActionButtons() {
+      if (!showBulk) {
+        return;
+      }
+      if (selectAllBtn) {
+        var visible = getVisibleDataIdsInOrder();
+        var canAdd = false;
+        if (visible.length && selected.size < maxSelections) {
+          var vi;
+          for (vi = 0; vi < visible.length; vi++) {
+            if (!selected.has(visible[vi])) {
+              canAdd = true;
+              break;
+            }
+          }
+        }
+        selectAllBtn.disabled = !canAdd;
+      }
+      if (clearAllBtn) {
+        clearAllBtn.disabled = selected.size === 0;
+      }
+    }
+
+    function selectAllVisible() {
+      var visible = getVisibleDataIdsInOrder();
+      var beforeSize = selected.size;
+      var i;
+      for (i = 0; i < visible.length; i++) {
+        if (selected.size >= maxSelections) {
+          break;
+        }
+        var vid = visible[i];
+        if (!selected.has(vid)) {
+          selected.add(vid);
+        }
+      }
+      if (selected.size === beforeSize) {
+        return;
+      }
+      syncRowAriaSelected();
+      syncRowSelectedClass();
+      renderPills();
+      emitChange();
+    }
+
+    function clearAllSelection() {
+      if (selected.size === 0) {
+        return;
+      }
+      selected.clear();
+      syncRowAriaSelected();
+      syncRowSelectedClass();
+      renderPills();
+      emitChange();
     }
 
     function positionPanel() {

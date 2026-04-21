@@ -64,6 +64,8 @@
           placeholder: "Search formats…",
           ariaLabel: "Delivery formats",
           multiple: true,
+          selectAllButton: true,
+          clearAllButton: true,
           onChange: function (rows) {
             out.textContent = JSON.stringify(rows, null, 2);
           },

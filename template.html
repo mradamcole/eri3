@@ -498,69 +498,81 @@
                   </div>
                   <div id="formulationCannabinoidTmsd"></div>
                 </div>
-                <div
-                  class="percent-slider-block"
-                  role="group"
-                  aria-labelledby="formulationPercentLabel"
-                >
-                  <span
-                    class="percent-slider-block__label"
-                    id="formulationPercentLabel"
-                  >
-                    Maximum THC
-                  </span>
+                <div class="formulation__thc-slider-row">
                   <div
-                    class="percent-slider"
+                    class="percent-slider-block"
+                    role="group"
                     aria-labelledby="formulationPercentLabel"
-                    data-min="0"
-                    data-max="25"
-                    data-step="1"
-                    data-range="false"
-                    data-fill="true"
-                    data-fill-color="#9e0000"
-                    data-track-color="#525252"
-                    data-track-style="depressed"
-                    data-ticks="below"
-                    data-tick-minor="0"
-                    data-tick-major="0"
-                    data-snap="custom"
-                    data-tick-label-size="0.62rem"
-                    data-tick-label-rotate="30"
-                    data-knob-style="house-inverted"
-                    data-value="0.75"
-                    data-value-min="20"
-                    data-value-max="25"
-                    data-tick-custom='[{"value":0,"label":"no THC"},{"value":0.4,"label":"low recreational"},{"value":0.12,"label":"clinical"},{"value":0.8,"label":"high recreational"}]'
                   >
-                    <div class="percent-slider__row">
-                      <div class="percent-slider__track-area">
-                        <div
-                          class="percent-slider__track"
-                          data-slider-track
-                        >
+                    <span
+                      class="percent-slider-block__label"
+                      id="formulationPercentLabel"
+                    >
+                      Maximum THC
+                    </span>
+                    <div
+                      id="formulationThcSlider"
+                      class="percent-slider"
+                      aria-labelledby="formulationPercentLabel"
+                      data-min="0"
+                      data-max="25"
+                      data-step="1"
+                      data-range="false"
+                      data-fill="true"
+                      data-fill-color="#2e7d32"
+                      data-track-color="#525252"
+                      data-track-style="depressed"
+                      data-ticks="below"
+                      data-tick-minor="0"
+                      data-tick-major="0"
+                      data-snap="custom"
+                      data-tick-label-size="0.62rem"
+                      data-tick-label-rotate="30"
+                      data-knob-style="house-inverted"
+                      data-value="0.75"
+                      data-value-min="20"
+                      data-value-max="25"
+                      data-tick-custom='[
+                    {"value":0,"label":"no THC"},
+                    {"value":0.12,"label":"entourage effect"},
+                    {"value":0.4,"label":"regular recreational"},
+                    {"value":0.8,"label":"frequent recreational"}]'
+                    >
+                      <div class="percent-slider__row">
+                        <div class="percent-slider__track-area">
                           <div
-                            class="percent-slider__fill"
-                            data-slider-fill
-                          ></div>
+                            class="percent-slider__track"
+                            data-slider-track
+                          >
+                            <div
+                              class="percent-slider__fill"
+                              data-slider-fill
+                            ></div>
+                          </div>
+                          <div class="percent-slider__knob" data-slider-knob>
+                            <span
+                              class="percent-slider__knob-inner"
+                              aria-hidden="true"
+                            ></span>
+                          </div>
                         </div>
-                        <div class="percent-slider__knob" data-slider-knob>
-                          <span
-                            class="percent-slider__knob-inner"
-                            aria-hidden="true"
-                          ></span>
+                        <div class="percent-slider__field">
+                          <input
+                            type="number"
+                            class="percent-slider__input"
+                            data-slider-input
+                            aria-labelledby="formulationPercentLabel"
+                          />
+                          <span class="percent-slider__suffix">%</span>
                         </div>
-                      </div>
-                      <div class="percent-slider__field">
-                        <input
-                          type="number"
-                          class="percent-slider__input"
-                          data-slider-input
-                          aria-labelledby="formulationPercentLabel"
-                        />
-                        <span class="percent-slider__suffix">%</span>
                       </div>
                     </div>
                   </div>
+                  <div
+                    id="formulationThcNote"
+                    class="formulation__thc-note"
+                    aria-live="polite"
+                  ></div>
                 </div>
               </div>
             </div>

@@ -20,9 +20,16 @@
   font-size: 0.875rem;
   width: 100%;
   max-width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0.35rem;
+  box-sizing: border-box;
 }
 
 .tmsd__bar {
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -146,6 +153,80 @@
 
 .tmsd--open .tmsd__toggle-icon {
   transform: rotate(180deg);
+}
+
+.tmsd__bulk {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  flex-shrink: 0;
+  gap: 0.25rem;
+}
+
+.tmsd__icon-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  width: 2.5rem;
+  height: 2.875rem;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0.2rem 0.1rem 0.15rem;
+  overflow: hidden;
+  color: #475569;
+  background: var(--tmsd-bg);
+  border: var(--tmsd-border);
+  border-radius: var(--tmsd-radius);
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.tmsd__icon-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.tmsd__icon-btn:focus {
+  outline: none;
+}
+
+.tmsd__icon-btn:focus-visible {
+  border-color: var(--tmsd-focus);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.tmsd__icon-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.tmsd__icon-btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.tmsd__icon-btn-icon svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+.tmsd__icon-btn-label {
+  display: block;
+  max-width: 100%;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Later siblings (e.g. percent slider) paint above this widget by default; lift

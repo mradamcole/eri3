@@ -311,6 +311,8 @@
       placeholder: "Search delivery formats…",
       ariaLabel: "Delivery formats",
       multiple: true,
+      selectAllButton: true,
+      clearAllButton: true,
     });
   }
 
@@ -323,7 +325,49 @@
       placeholder: "Search cannabinoids…",
       ariaLabel: "Cannabinoids of interest",
       multiple: true,
+      selectAllButton: true,
+      clearAllButton: true,
     });
+  }
+
+  const FORMULATION_THC_MSG_ZERO =
+    "Clinical note: THC-free products may be appropriate for patients avoiding psychoactive effects. However, evidence suggests that small amounts of THC can enhance or modify the effects of other cannabinoids ('entourage effect').";
+
+  const FORMULATION_THC_MSG_HIGH =
+    "Higher THC levels may increase the risk of adverse effects, including anxiety, dizziness, cognitive impairment, and sedation. Consider whether a lower THC dose or inclusion of CBD may better support tolerability, especially for cannabis-naïve or sensitive patients.";
+
+  function initFormulationThcNote() {
+    const slider = document.getElementById("formulationThcSlider");
+    const note = document.getElementById("formulationThcNote");
+    const exposure = document.querySelector(
+      'input[name="ccChar"][value="cannabinoid_exposure"]'
+    );
+    if (!slider || !note || !exposure) return;
+
+    function readSliderPercent() {
+      const input = slider.querySelector("[data-slider-input]");
+      if (!input) return Number.NaN;
+      const n = Number(String(input.value).trim());
+      return Number.isFinite(n) ? n : Number.NaN;
+    }
+
+    function refreshFormulationThcNote() {
+      const v = readSliderPercent();
+      if (!Number.isFinite(v)) {
+        note.textContent = "";
+        return;
+      }
+      if (v === 0) {
+        note.textContent = FORMULATION_THC_MSG_ZERO;
+        return;
+      }
+      const threshold = exposure.checked ? 10 : 5;
+      note.textContent = v > threshold ? FORMULATION_THC_MSG_HIGH : "";
+    }
+
+    slider.addEventListener("percent-slider-change", refreshFormulationThcNote);
+    exposure.addEventListener("change", refreshFormulationThcNote);
+    queueMicrotask(refreshFormulationThcNote);
   }
 
   function initTemplatePage() {
@@ -331,6 +375,7 @@
     initEvidenceCard();
     initFormulationFormatSelect();
     initFormulationCannabinoidSelect();
+    initFormulationThcNote();
   }
 
   if (document.readyState === "loading") {
