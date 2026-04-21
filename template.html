@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Evidence Reasoning Engine — template</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="template-shell.css" />
+    <link rel="stylesheet" href="chevron-progress.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-shell__header">
+        <span class="app-shell__logo" aria-hidden="true"></span>
+        <h1 class="app-shell__title">Evidence Reasoning Engine(TM)</h1>
+      </header>
+
+      <main class="app-shell__main" role="main">
+        <div class="app-shell__cards">
+          <details class="app-shell__card app-shell__card--collapsible" open>
+            <summary class="app-shell__card-summary">
+              <span class="app-shell__card-chevron" aria-hidden="true">
+                <svg
+                  class="app-shell__card-chevron-svg"
+                  width="10"
+                  height="10"
+                  viewBox="0 0 10 10"
+                  focusable="false"
+                >
+                  <polygon points="2,1 9,5 2,9" fill="currentColor" />
+                </svg>
+              </span>
+              <h2 class="app-shell__card-title">Clinical Context</h2>
+            </summary>
+            <div class="app-shell__card-body">
+              <div class="clinical-context">
+                <p class="clinical-context__subtitle">
+                  Define what you are treating to generate personalized,
+                  evidence-based guidance.
+                </p>
+
+                <section
+                  class="clinical-context__step"
+                  aria-labelledby="cc-step1-title"
+                >
+                  <div class="clinical-context__step-head">
+                    <span class="clinical-context__badge" aria-hidden="true"
+                      >1</span
+                    >
+                    <h3 class="clinical-context__step-title" id="cc-step1-title">
+                      Condition
+                      <span class="clinical-context__paren">(required)</span>
+                    </h3>
+                  </div>
+
+                  <div class="clinical-context__combobox" id="conditionCombobox">
+                    <div class="clinical-context__combobox-field">
+                      <span
+                        class="clinical-context__combobox-icon"
+                        aria-hidden="true"
+                      >
+                        <svg
+                          class="clinical-context__brain-svg"
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          focusable="false"
+                          aria-hidden="true"
+                        >
+                          <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z" />
+                          <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z" />
+                        </svg>
+                      </span>
+                      <input
+                        type="text"
+                        class="clinical-context__combobox-input"
+                        id="conditionInput"
+                        role="combobox"
+                        aria-autocomplete="list"
+                        aria-expanded="false"
+                        aria-controls="conditionListbox"
+                        aria-activedescendant=""
+                        autocomplete="off"
+                        spellcheck="false"
+                      />
+                      <button
+                        type="button"
+                        class="clinical-context__combobox-chevron"
+                        id="conditionToggleBtn"
+                        aria-label="Show condition suggestions"
+                        tabindex="-1"
+                      >
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 10 10"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <polygon points="1,2 5,8 9,2" fill="currentColor" />
+                        </svg>
+                      </button>
+                    </div>
+                    <ul
+                      class="clinical-context__listbox"
+                      id="conditionListbox"
+                      role="listbox"
+                      hidden
+                    ></ul>
+                    <p class="clinical-context__hint" id="conditionHint"></p>
+                  </div>
+                </section>
+
+                <section
+                  class="clinical-context__step clinical-context__panel clinical-context__panel--white"
+                  aria-labelledby="cc-step2-title"
+                >
+                  <div class="clinical-context__step-head">
+                    <span class="clinical-context__badge" aria-hidden="true"
+                      >2</span
+                    >
+                    <h3 class="clinical-context__step-title" id="cc-step2-title">
+                      Refine Clinical Target
+                      <span class="clinical-context__paren">(required)</span>
+                    </h3>
+                  </div>
+                  <p class="clinical-context__lead">
+                    Required to tailor evidence and safety outputs. Select one or
+                    more targets that best describe the patient&apos;s symptoms.
+                  </p>
+                  <div
+                    class="clinical-context__target-grid"
+                    role="group"
+                    aria-label="Clinical symptom targets"
+                  >
+                    <label class="clinical-context__tile">
+                      <input
+                        type="checkbox"
+                        class="clinical-context__tile-input"
+                        name="ccTarget"
+                        value="motor"
+                        checked
+                      />
+                      <span class="clinical-context__tile-body">
+                        <span class="clinical-context__tile-title"
+                          >Motor / spasticity</span
+                        >
+                        <span class="clinical-context__tile-desc"
+                          >Muscle stiffness, spasms, motor hyperexcitability</span
+                        >
+                      </span>
+                    </label>
+                    <label class="clinical-context__tile">
+                      <input
+                        type="checkbox"
+                        class="clinical-context__tile-input"
+                        name="ccTarget"
+                        value="neuropathic"
+                      />
+                      <span class="clinical-context__tile-body">
+                        <span class="clinical-context__tile-title"
+                          >Neuropathic</span
+                        >
+                        <span class="clinical-context__tile-desc"
+                          >Nerve-related pain or abnormal sensations</span
+                        >
+                      </span>
+                    </label>
+                    <label class="clinical-context__tile">
+                      <input
+                        type="checkbox"
+                        class="clinical-context__tile-input"
+                        name="ccTarget"
+                        value="sleep"
+                      />
+                      <span class="clinical-context__tile-body">
+                        <span class="clinical-context__tile-title"
+                          >Sleep-related</span
+                        >
+                        <span class="clinical-context__tile-desc"
+                          >Insomnia or disrupted sleep due to symptoms</span
+                        >
+                      </span>
+                    </label>
+                    <label class="clinical-context__tile">
+                      <input
+                        type="checkbox"
+                        class="clinical-context__tile-input"
+                        name="ccTarget"
+                        value="bladder"
+                      />
+                      <span class="clinical-context__tile-body">
+                        <span class="clinical-context__tile-title"
+                          >Bladder dysfunction</span
+                        >
+                        <span class="clinical-context__tile-desc"
+                          >Urinary urgency, frequency, or retention</span
+                        >
+                      </span>
+                    </label>
+                    <label class="clinical-context__tile">
+                      <input
+                        type="checkbox"
+                        class="clinical-context__tile-input"
+                        name="ccTarget"
+                        value="pain"
+                      />
+                      <span class="clinical-context__tile-body">
+                        <span class="clinical-context__tile-title">Pain</span>
+                        <span class="clinical-context__tile-desc"
+                          >General pain not specific to nerve damage</span
+                        >
+                      </span>
+                    </label>
+                    <label class="clinical-context__tile">
+                      <input
+                        type="checkbox"
+                        class="clinical-context__tile-input"
+                        name="ccTarget"
+                        value="anxiety"
+                      />
+                      <span class="clinical-context__tile-body">
+                        <span class="clinical-context__tile-title"
+                          >Anxiety-related</span
+                        >
+                        <span class="clinical-context__tile-desc"
+                          >Anxiety symptoms or distress</span
+                        >
+                      </span>
+                    </label>
+                    <label class="clinical-context__tile">
+                      <input
+                        type="checkbox"
+                        class="clinical-context__tile-input"
+                        name="ccTarget"
+                        value="fatigue"
+                      />
+                      <span class="clinical-context__tile-body">
+                        <span class="clinical-context__tile-title">Fatigue</span>
+                        <span class="clinical-context__tile-desc"
+                          >MS-related fatigue</span
+                        >
+                      </span>
+                    </label>
+                    <label class="clinical-context__tile">
+                      <input
+                        type="checkbox"
+                        class="clinical-context__tile-input"
+                        name="ccTarget"
+                        value="other"
+                      />
+                      <span class="clinical-context__tile-body">
+                        <span class="clinical-context__tile-title">Other</span>
+                        <span class="clinical-context__tile-desc"
+                          >Select if not listed</span
+                        >
+                      </span>
+                    </label>
+                  </div>
+                </section>
+
+                <section
+                  class="clinical-context__step clinical-context__panel"
+                  aria-labelledby="cc-step3-title"
+                >
+                  <div class="clinical-context__step-head">
+                    <span class="clinical-context__badge" aria-hidden="true"
+                      >3</span
+                    >
+                    <h3 class="clinical-context__step-title" id="cc-step3-title">
+                      Patient Factors
+                      <span class="clinical-context__paren"
+                        >(optional but recommended)</span
+                      >
+                    </h3>
+                  </div>
+                  <p class="clinical-context__lead">
+                    Adding relevant patient information will refine safety,
+                    interaction checks, and monitoring recommendations for increased
+                    applicability.
+                  </p>
+                  <div class="clinical-context__factors">
+                    <div class="clinical-context__factors-col">
+                      <p
+                        class="clinical-context__factors-label"
+                        id="cc-factors-char"
+                      >
+                        Characteristics
+                      </p>
+                      <ul
+                        class="clinical-context__check-list"
+                        aria-labelledby="cc-factors-char"
+                      >
+                        <li>
+                          <label class="clinical-context__check">
+                            <input type="checkbox" name="ccChar" value="age" />
+                            <span>Age</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label class="clinical-context__check">
+                            <input type="checkbox" name="ccChar" value="sex" />
+                            <span>Sex (assigned at birth)</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label class="clinical-context__check">
+                            <input
+                              type="checkbox"
+                              name="ccChar"
+                              value="cannabinoid_exposure"
+                            />
+                            <span>Past cannabinoid exposure</span>
+                          </label>
+                        </li>
+                      </ul>
+                    </div>
+                    <div class="clinical-context__factors-col">
+                      <p
+                        class="clinical-context__factors-label"
+                        id="cc-factors-additional"
+                      >
+                        Additional Risks
+                      </p>
+                      <div
+                        class="clinical-context__risk-cols"
+                        role="group"
+                        aria-labelledby="cc-factors-additional"
+                      >
+                        <ul class="clinical-context__check-list">
+                          <li>
+                            <label class="clinical-context__check">
+                              <input
+                                type="checkbox"
+                                name="ccRisk"
+                                value="frailty"
+                              />
+                              <span>Frailty / fall risk</span>
+                            </label>
+                          </li>
+                          <li>
+                            <label class="clinical-context__check">
+                              <input
+                                type="checkbox"
+                                name="ccRisk"
+                                value="pregnancy"
+                              />
+                              <span>Pregnancy or breastfeeding</span>
+                            </label>
+                          </li>
+                          <li>
+                            <label class="clinical-context__check">
+                              <input
+                                type="checkbox"
+                                name="ccRisk"
+                                value="hepatic"
+                              />
+                              <span>Hepatic impairment</span>
+                            </label>
+                          </li>
+                          <li>
+                            <label class="clinical-context__check">
+                              <input type="checkbox" name="ccRisk" value="renal" />
+                              <span>Renal impairment</span>
+                            </label>
+                          </li>
+                        </ul>
+                        <ul class="clinical-context__check-list">
+                          <li>
+                            <label class="clinical-context__check">
+                              <input
+                                type="checkbox"
+                                name="ccRisk"
+                                value="sedation"
+                                checked
+                              />
+                              <span>Sedation risk</span>
+                            </label>
+                          </li>
+                          <li>
+                            <label class="clinical-context__check">
+                              <input type="checkbox" name="ccRisk" value="psych" />
+                              <span>Psychiatric risk</span>
+                            </label>
+                          </li>
+                          <li>
+                            <label class="clinical-context__check">
+                              <input
+                                type="checkbox"
+                                name="ccRisk"
+                                value="substance"
+                              />
+                              <span>Substance use risk</span>
+                            </label>
+                          </li>
+                          <li>
+                            <label class="clinical-context__check">
+                              <input type="checkbox" name="ccRisk" value="cv" />
+                              <span>Cardiovascular risk</span>
+                            </label>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="clinical-context__factors-col">
+                      <p
+                        class="clinical-context__factors-label"
+                        id="cc-factors-meds"
+                      >
+                        Medications
+                      </p>
+                      <ul
+                        class="clinical-context__check-list"
+                        aria-labelledby="cc-factors-meds"
+                      >
+                        <li>
+                          <label
+                            class="clinical-context__check clinical-context__check--wrap"
+                          >
+                            <input type="checkbox" name="ccMed" value="cyp_warfarin" />
+                            <span>Clobazam, Valproate, Warfarin, CYP3A4 inhibitors, CYP inducers</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label
+                            class="clinical-context__check clinical-context__check--wrap"
+                          >
+                            <input type="checkbox" name="ccMed" value="cns_immuno" />
+                            <span>CNS depressants, immunosuppressants, alcohol</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label class="clinical-context__check">
+                            <input type="checkbox" name="ccMed" value="cv_agents" />
+                            <span>Cardiovascular agents</span>
+                          </label>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </details>
+
+          <article class="app-shell__card">
+            <header class="app-shell__card-header">
+              <h2 class="app-shell__card-title">Evidence Synthesis</h2>
+            </header>
+            <div class="app-shell__card-body">
+              <div
+                class="evidence-card"
+                lang="en-CA"
+                id="evidenceCard"
+                data-evidence-card
+              >
+                <div class="evidence-card__hero">
+                  <div class="evidence-card__rec">
+                    <div class="evidence-card__rec-icon" aria-hidden="true">
+                      <svg width="100" height="100" viewBox="0 0 24 24" fill="none">
+                        <path
+                          d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11 4.5-.85 8-5.75 8-11V6l-8-4z"
+                          fill="#e8f5e9"
+                          stroke="#2e7d32"
+                          stroke-width="1.25"
+                        />
+                        <path
+                          d="M9.2 12.3l1.5 1.5 3.5-4"
+                          stroke="#2e7d32"
+                          stroke-width="1.75"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </div>
+                    <div class="evidence-card__rec-body">
+                      <p class="evidence-card__rec-status">Supported</p>
+                      <p class="evidence-card__rec-desc">
+                        Evidence suggests potential benefit for MS-related spasticity.
+                      </p>
+                      <button type="button" class="evidence-card__rec-link">
+                        View details
+                      </button>
+                    </div>
+                  </div>
+                  <div class="evidence-card__facts" aria-label="Quick facts">
+                    <p class="evidence-card__facts-title">Quick Facts</p>
+                    <ul class="evidence-card__facts-list">
+                      <li class="evidence-card__fact">
+                        <span
+                          class="evidence-card__fact-icon evidence-card__fact-icon--quality"
+                          aria-hidden="true"
+                        >
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g fill="#1e4a7a">
+                              <rect x="5.1" y="5.1" width="3.4" height="3.4" rx="0.35" />
+                              <rect x="9.1" y="5.1" width="3.4" height="3.4" rx="0.35" />
+                              <rect x="13.1" y="5.1" width="3.4" height="3.4" rx="0.35" />
+                              <rect x="5.1" y="9.1" width="3.4" height="3.4" rx="0.35" />
+                              <rect x="9.1" y="9.1" width="3.4" height="3.4" rx="0.35" />
+                              <rect x="13.1" y="9.1" width="3.4" height="3.4" rx="0.35" />
+                              <rect x="5.1" y="13.1" width="3.4" height="3.4" rx="0.35" />
+                              <rect x="9.1" y="13.1" width="3.4" height="3.4" rx="0.35" />
+                              <rect x="13.1" y="13.1" width="3.4" height="3.4" rx="0.35" />
+                            </g>
+                          </svg>
+                        </span>
+                        <span class="evidence-card__fact-primary">Moderate Quality</span>
+                        <span class="evidence-card__fact-secondary">Overall evidence quality</span>
+                      </li>
+                      <li class="evidence-card__fact evidence-card__fact--accent">
+                        <span
+                          class="evidence-card__fact-icon evidence-card__fact-icon--check"
+                          aria-hidden="true"
+                        >
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                              d="M7.25 12.25 10.5 15.5 16.75 8.75"
+                              stroke="#2e7d32"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            />
+                          </svg>
+                        </span>
+                        <span class="evidence-card__fact-primary">Consistent Findings</span>
+                        <span class="evidence-card__fact-secondary">Across multiple studies</span>
+                      </li>
+                      <li class="evidence-card__fact">
+                        <span
+                          class="evidence-card__fact-icon evidence-card__fact-icon--favour"
+                          aria-hidden="true"
+                        >
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                              d="M12 6.2c1.2-1.4 3.4-1.3 4.5.2 1.1 1.5.7 3.6-.8 5.6-1.4 1.8-3.7 3.5-3.7 3.5s-2.3-1.7-3.7-3.5c-1.5-2-1.9-4.1-.8-5.6 1.1-1.5 3.3-1.6 4.5-.2Z"
+                              fill="#1e4a7a"
+                            />
+                          </svg>
+                        </span>
+                        <span class="evidence-card__fact-primary">Generally Favourable</span>
+                        <span class="evidence-card__fact-secondary">Risk-benefit balance</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="evidence-card__stepper">
+                  <div data-evidence-stepper-host></div>
+                </div>
+
+                <div class="evidence-card__panels">
+                  <div
+                    class="evidence-card__panel"
+                    role="tabpanel"
+                    id="evidence-panel-0"
+                    aria-labelledby="evidence-tab-0"
+                  >
+                    <section class="evidence-card__summary" aria-labelledby="evidence-summary-heading">
+                      <h3 id="evidence-summary-heading" class="evidence-card__summary-title">
+                        Summary
+                      </h3>
+                      <p class="evidence-card__summary-text">
+                        Multiple studies and reviews suggest that cannabinoids may reduce
+                        spasticity in people with multiple sclerosis. Evidence is moderate in
+                        quality with consistent findings. Benefits should be weighed against
+                        potential side effects and individual patient factors.
+                      </p>
+                    </section>
+                    <div class="evidence-card__columns">
+                      <section
+                        class="evidence-card__signals"
+                        aria-labelledby="evidence-signals-heading"
+                      >
+                        <h3 id="evidence-signals-heading" class="evidence-card__col-title">
+                          Evidence Signals
+                        </h3>
+                        <ul class="evidence-card__signal-list">
+                          <li class="evidence-card__signal">
+                            <span class="evidence-card__signal-name">Mechanistic plausibility</span>
+                            <span class="evidence-card__signal-track" aria-hidden="true"
+                              ><span class="evidence-card__signal-fill evidence-card__signal-fill--strong" style="width:92%"></span
+                            ></span>
+                            <span class="evidence-card__signal-rating evidence-card__signal-rating--strong">Strong</span>
+                          </li>
+                          <li class="evidence-card__signal">
+                            <span class="evidence-card__signal-name">Clinical directness</span>
+                            <span class="evidence-card__signal-track" aria-hidden="true"
+                              ><span class="evidence-card__signal-fill evidence-card__signal-fill--strong" style="width:88%"></span
+                            ></span>
+                            <span class="evidence-card__signal-rating evidence-card__signal-rating--strong">High</span>
+                          </li>
+                          <li class="evidence-card__signal">
+                            <span class="evidence-card__signal-name">Generalizability</span>
+                            <span class="evidence-card__signal-track" aria-hidden="true"
+                              ><span class="evidence-card__signal-fill evidence-card__signal-fill--moderate" style="width:55%"></span
+                            ></span>
+                            <span class="evidence-card__signal-rating evidence-card__signal-rating--moderate">Moderate</span>
+                          </li>
+                          <li class="evidence-card__signal">
+                            <span class="evidence-card__signal-name">Consistency</span>
+                            <span class="evidence-card__signal-track" aria-hidden="true"
+                              ><span class="evidence-card__signal-fill evidence-card__signal-fill--strong" style="width:85%"></span
+                            ></span>
+                            <span class="evidence-card__signal-rating evidence-card__signal-rating--strong">High</span>
+                          </li>
+                          <li class="evidence-card__signal">
+                            <span class="evidence-card__signal-name">Precision</span>
+                            <span class="evidence-card__signal-track" aria-hidden="true"
+                              ><span class="evidence-card__signal-fill evidence-card__signal-fill--moderate" style="width:52%"></span
+                            ></span>
+                            <span class="evidence-card__signal-rating evidence-card__signal-rating--moderate">Moderate</span>
+                          </li>
+                          <li class="evidence-card__signal">
+                            <span class="evidence-card__signal-name">Study design strength</span>
+                            <span class="evidence-card__signal-track" aria-hidden="true"
+                              ><span class="evidence-card__signal-fill evidence-card__signal-fill--design" style="width:58%"></span
+                            ></span>
+                            <span class="evidence-card__signal-rating evidence-card__signal-rating--design">Moderate</span>
+                          </li>
+                          <li class="evidence-card__signal">
+                            <span class="evidence-card__signal-name">Safety profile</span>
+                            <span class="evidence-card__signal-track" aria-hidden="true"
+                              ><span class="evidence-card__signal-fill evidence-card__signal-fill--strong" style="width:80%"></span
+                            ></span>
+                            <span class="evidence-card__signal-rating evidence-card__signal-rating--strong">Favourable</span>
+                          </li>
+                        </ul>
+                      </section>
+                      <section class="evidence-card__glance" aria-labelledby="evidence-glance-heading">
+                        <h3 id="evidence-glance-heading" class="evidence-card__col-title">
+                          At a Glance
+                        </h3>
+                        <ul class="evidence-card__glance-list">
+                          <li class="evidence-card__glance-item evidence-card__glance-item--pos">
+                            May improve patient-reported spasticity symptoms.
+                          </li>
+                          <li class="evidence-card__glance-item evidence-card__glance-item--pos">
+                            Moderate-quality evidence from RCTs and systematic reviews.
+                          </li>
+                          <li class="evidence-card__glance-item evidence-card__glance-item--pos">
+                            Consistent direction of effect across included studies.
+                          </li>
+                          <li class="evidence-card__glance-item evidence-card__glance-item--caution">
+                            Central nervous system adverse effects are commonly reported.
+                          </li>
+                          <li class="evidence-card__glance-item evidence-card__glance-item--caution">
+                            Titrate slowly; consider drug interactions and comorbidities.
+                          </li>
+                        </ul>
+                      </section>
+                    </div>
+                  </div>
+
+                  <div
+                    class="evidence-card__panel evidence-card__panel--placeholder"
+                    role="tabpanel"
+                    id="evidence-panel-1"
+                    aria-labelledby="evidence-tab-1"
+                    hidden
+                  >
+                    <p class="evidence-card__placeholder">Safety content to be added.</p>
+                  </div>
+                  <div
+                    class="evidence-card__panel evidence-card__panel--placeholder"
+                    role="tabpanel"
+                    id="evidence-panel-2"
+                    aria-labelledby="evidence-tab-2"
+                    hidden
+                  >
+                    <p class="evidence-card__placeholder">Monitoring content to be added.</p>
+                  </div>
+                  <div
+                    class="evidence-card__panel evidence-card__panel--placeholder"
+                    role="tabpanel"
+                    id="evidence-panel-3"
+                    aria-labelledby="evidence-tab-3"
+                    hidden
+                  >
+                    <p class="evidence-card__placeholder">Key references content to be added.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </main>
+
+      <footer class="app-shell__footer">
+        <p class="app-shell__footer-copy">(C) gojitech(tm)</p>
+        <p class="app-shell__footer-note">
+          <svg
+            class="app-shell__info-icon"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="9"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+            />
+            <path
+              fill="currentColor"
+              d="M11 10h2v8h-2zm0-4h2v2h-2z"
+            />
+          </svg>
+          <span>Clinical Decision Support only</span>
+        </p>
+      </footer>
+    </div>
+    <script src="chevron-progress.js" defer></script>
+    <script src="template.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,123 @@
+/**
+ * Chevron-style step progress bar (2–10 steps).
+ * Geometry: --first / --middle / --last; states: --before / --current / --after.
+ */
+
+.chevron-progress {
+  --cp-inset: 12%;
+  --cp-gap: 3px;
+  --cp-min-h: 2.5rem;
+  --cp-pad-x: 0.75rem;
+  /* Readable navy (not near-black); still darker than --cp-active */
+  --cp-navy: #1e3a5f;
+  --cp-active: #4169e1;
+  /* Match clinical-context panel (Patient Factors): --cc-panel-bg */
+  --cp-future: #eef4f9;
+  --cp-on-dark: #ffffff;
+  --cp-on-light: #546e7a;
+  --cp-r: calc(var(--cp-min-h) / 2);
+
+  width: 100%;
+  max-width: 100%;
+  font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.chevron-progress__list {
+  display: flex;
+  flex: 1;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: var(--cp-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.chevron-progress__step {
+  position: relative;
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: var(--cp-min-h);
+  padding: 0.35rem var(--cp-pad-x);
+  text-align: center;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chevron-progress__step--first {
+  border-top-left-radius: var(--cp-r);
+  border-bottom-left-radius: var(--cp-r);
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--cp-inset)) 0,
+    100% 50%,
+    calc(100% - var(--cp-inset)) 100%,
+    0 100%
+  );
+}
+
+.chevron-progress__step--middle {
+  clip-path: polygon(
+    0% 0%,
+    calc(100% - var(--cp-inset)) 0%,
+    100% 50%,
+    calc(100% - var(--cp-inset)) 100%,
+    0% 100%,
+    var(--cp-inset) 50%
+  );
+}
+
+.chevron-progress__step--last {
+  border-top-right-radius: var(--cp-r);
+  border-bottom-right-radius: var(--cp-r);
+  clip-path: polygon(
+    0% 0%,
+    var(--cp-inset) 50%,
+    0% 100%,
+    100% 100%,
+    100% 0%
+  );
+}
+
+.chevron-progress__step--before {
+  background-color: var(--cp-navy);
+  color: var(--cp-on-dark);
+}
+
+.chevron-progress__step--current {
+  background-color: var(--cp-active);
+  color: var(--cp-on-dark);
+}
+
+.chevron-progress__step--after {
+  background-color: var(--cp-future);
+  color: var(--cp-on-light);
+}
+
+.chevron-progress__label {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron-progress__step:focus {
+  outline: none;
+}
+
+.chevron-progress__step:focus-visible {
+  outline: 2px solid var(--cp-active);
+  outline-offset: 2px;
+}

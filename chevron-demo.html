@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chevron progress bar — demo</title>
+    <link rel="stylesheet" href="chevron-progress.css" />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem 1.25rem;
+        font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: #e2e8f0;
+        background-color: #0f172a;
+        background-image:
+          linear-gradient(rgba(148, 163, 184, 0.12) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+        background-size: 24px 24px;
+      }
+      h1 {
+        margin: 0 0 0.5rem;
+        font-size: 1.25rem;
+        font-weight: 700;
+      }
+      p {
+        margin: 0 0 1.25rem;
+        font-size: 0.875rem;
+        color: #94a3b8;
+        max-width: 40rem;
+      }
+      .demo-panel {
+        max-width: 56rem;
+        margin: 0 auto;
+      }
+      .demo-widget {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: rgba(15, 23, 42, 0.65);
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        border-radius: 12px;
+      }
+      .demo-widget h2 {
+        margin: 0 0 0.75rem;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: #f1f5f9;
+      }
+      .demo-host {
+        margin-bottom: 1rem;
+      }
+      .demo-controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .demo-controls button {
+        padding: 0.4rem 0.75rem;
+        font: inherit;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #0f172a;
+        background: #e2e8f0;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .demo-controls button:hover {
+        background: #cbd5e1;
+      }
+      .demo-controls button:focus-visible {
+        outline: 2px solid #4169e1;
+        outline-offset: 2px;
+      }
+      .demo-meta {
+        font-size: 0.75rem;
+        color: #64748b;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="demo-panel">
+      <h1>Chevron progress bar</h1>
+      <p>
+        Three samples (2, 3, and 10 steps). Use the buttons to change the active
+        step.         Open the console and use e.g.
+        <code style="color: #cbd5e1">demoApi.demo3.setActiveIndex(1)</code> or
+        <code style="color: #cbd5e1">demoApi.demo10.getActiveIndex()</code>.
+      </p>
+
+      <section class="demo-widget" id="demo2">
+        <h2>Two steps</h2>
+        <div class="demo-host" data-demo-host></div>
+        <div class="demo-controls">
+          <button type="button" data-action="prev">Previous</button>
+          <button type="button" data-action="next">Next</button>
+        </div>
+        <p class="demo-meta" data-demo-meta></p>
+      </section>
+
+      <section class="demo-widget" id="demo3">
+        <h2>Three steps</h2>
+        <div class="demo-host" data-demo-host></div>
+        <div class="demo-controls">
+          <button type="button" data-action="prev">Previous</button>
+          <button type="button" data-action="next">Next</button>
+        </div>
+        <p class="demo-meta" data-demo-meta></p>
+      </section>
+
+      <section class="demo-widget" id="demo10">
+        <h2>Ten steps</h2>
+        <div class="demo-host" data-demo-host></div>
+        <div class="demo-controls">
+          <button type="button" data-action="prev">Previous</button>
+          <button type="button" data-action="next">Next</button>
+        </div>
+        <p class="demo-meta" data-demo-meta></p>
+      </section>
+    </div>
+
+    <script src="chevron-progress.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        var configs = [
+          { root: "#demo2", steps: ["Qualified", "Closed"] },
+          {
+            root: "#demo3",
+            steps: ["Qualified", "Unqualified", "Closed"],
+          },
+          {
+            root: "#demo10",
+            steps: [
+              "Step 1",
+              "Step 2",
+              "Step 3",
+              "Step 4",
+              "Step 5",
+              "Step 6",
+              "Step 7",
+              "Step 8",
+              "Step 9",
+              "Step 10",
+            ],
+          },
+        ];
+
+        var demoApi = {};
+
+        configs.forEach(function (cfg, idx) {
+          var section = document.querySelector(cfg.root);
+          if (!section || !window.ChevronProgress) {
+            return;
+          }
+          var host = section.querySelector("[data-demo-host]");
+          var meta = section.querySelector("[data-demo-meta]");
+          var api = window.ChevronProgress.init(host, {
+            steps: cfg.steps,
+            activeIndex: 0,
+          });
+          var key = "demo" + cfg.steps.length;
+          demoApi[key] = api;
+
+          function syncMeta() {
+            if (meta) {
+              meta.textContent =
+                "Active index: " +
+                api.getActiveIndex() +
+                " — label: " +
+                cfg.steps[api.getActiveIndex()];
+            }
+          }
+
+          syncMeta();
+
+          section.querySelectorAll("[data-action]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var cur = api.getActiveIndex();
+              if (btn.getAttribute("data-action") === "prev") {
+                api.setActiveIndex(cur - 1);
+              } else {
+                api.setActiveIndex(cur + 1);
+              }
+              syncMeta();
+            });
+          });
+
+        });
+
+        window.demoApi = demoApi;
+      })();
+    </script>
+  </body>
+</html>

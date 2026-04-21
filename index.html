@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Evidence Reasoning Instrument (ERI) — guideRx</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <div class="hero-column">
+        <header class="site-header">
+          <a class="brand" href="#" aria-label="guideRx gojitech home">
+            <span class="brand__mark" aria-hidden="true">
+              <span class="brand__word">
+                guideR<span class="brand__x-wrap"
+                  ><span class="brand__leaf" aria-hidden="true"></span>x</span>
+              </span>
+            </span>
+            <span class="brand__sub">gojitech</span>
+          </a>
+        </header>
+
+        <main class="hero">
+          <h1 class="hero__title">Evidence Reasoning Instrument (ERI)</h1>
+          <p class="hero__subtitle">
+            Evidence-guided cannabinoid prescribing support.
+          </p>
+          <button type="button" class="hero__start" id="startBtn">
+            START
+          </button>
+        </main>
+      </div>
+
+      <aside class="process-panel" aria-label="Process overview">
+        <div class="process-panel__top">
+          <span class="lang-pill" title="English only">ENG</span>
+        </div>
+        <ol class="steps">
+          <li class="steps__item">
+            <span class="steps__num" aria-hidden="true">1</span>
+            <span class="steps__text">Provide Patient’s Primary Condition</span>
+          </li>
+          <li class="steps__item">
+            <span class="steps__num" aria-hidden="true">2</span>
+            <span class="steps__text"
+              >Provide Additional Patient Characteristics or Formulation
+              Preferences (optional)</span
+            >
+          </li>
+          <li class="steps__item">
+            <span class="steps__num" aria-hidden="true">3</span>
+            <span class="steps__text">Explore Formulations List</span>
+          </li>
+          <li class="steps__item">
+            <span class="steps__num" aria-hidden="true">4</span>
+            <span class="steps__text">Review Evidence</span>
+          </li>
+          <li class="steps__item">
+            <span class="steps__num" aria-hidden="true">5</span>
+            <span class="steps__text"
+              >Narrow Formulation Choice(s) for Your Patient</span
+            >
+          </li>
+        </ol>
+      </aside>
+    </div>
+
+    <dialog class="entry-dialog" id="entryDialog" aria-labelledby="entryDialogTitle">
+      <div class="entry-dialog__inner entry-dialog__inner--ack">
+        <h2 id="entryDialogTitle" class="ack__title">
+          Please read and acknowledge before proceeding:
+        </h2>
+        <div class="ack__body">
+          <p class="ack__p">
+            This software provides synthesized research information intended solely
+            to support clinical decision-making by licensed healthcare professionals.
+            The platform does not provide medical advice, treatment recommendations,
+            or prescribing directives.
+          </p>
+          <p class="ack__p">
+            Content is generated through aggregation and analysis of published
+            research and may be incomplete, evolving, or subject to interpretation.
+            Accuracy and applicability to individual patients are not guaranteed.
+          </p>
+          <p class="ack__p">
+            Some outputs may be generated using automated analytical or artificial
+            intelligence methods applied to medical literature. These outputs are
+            intended to assist — not replace — clinical reasoning and must be
+            independently evaluated by the licensed healthcare professional.
+          </p>
+          <p class="ack__p">
+            The healthcare professional remains solely and independently responsible
+            for evaluating all information, exercising professional judgment, and
+            making all prescribing and treatment decisions. Use of this platform does
+            not establish a healthcare professional-patient relationship with the
+            software provider.
+          </p>
+        </div>
+
+        <fieldset class="ack-role">
+          <legend class="ack-role__legend">I AM ACCESSING THIS TOOL AS A</legend>
+          <div class="ack-role__cards">
+            <label class="ack-card">
+              <input
+                class="ack-card__radio"
+                type="radio"
+                name="ackRole"
+                value="hcp"
+                id="ackRoleHcp"
+              />
+              <span class="ack-card__main">
+                <span class="ack-card__title">Licensed healthcare professional</span>
+                <span class="ack-card__sub"
+                  >I confirm I am a licensed HCP and accept full responsibility for
+                  clinical use of this information.</span
+                >
+              </span>
+            </label>
+            <label class="ack-card">
+              <input
+                class="ack-card__radio"
+                type="radio"
+                name="ackRole"
+                value="educator"
+                id="ackRoleEducator"
+              />
+              <span class="ack-card__main">
+                <span class="ack-card__title">Patient educator</span>
+                <span class="ack-card__sub"
+                  >I am acting under administrative delegation from a licensed
+                  healthcare professional. I will use this tool only to retrieve
+                  information for HCP review or to support patient conversations under
+                  their direction. I will not make independent clinical
+                  recommendations.</span
+                >
+              </span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="ack-persist">
+          <input type="checkbox" id="ackPersist" name="ackPersist" />
+          <label class="ack-persist__label" for="ackPersist"
+            >Do not show this notice again for one year — only select if you are on a
+            personal, non-shared device.</label
+          >
+        </div>
+
+        <div class="ack-actions">
+          <button type="button" class="ack-proceed" id="proceedBtn" disabled>
+            Proceed
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <script src="script.js"></script>
+  </body>
+</html>
