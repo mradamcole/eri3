@@ -120,6 +120,18 @@
     var fillAttr = root.getAttribute("data-fill");
     var fillEnabled = fillAttr !== "false" && fillAttr !== "0";
     var fillColor = root.getAttribute("data-fill-color") || "#8b0000";
+    var trackColorRaw = root.getAttribute("data-track-color");
+    var trackBaseDefault = "#3a3a3a";
+    function isHexColorToken(s) {
+      return (
+        typeof s === "string" &&
+        /^#[0-9A-Fa-f]{3}([0-9A-Fa-f]{3})?$/.test(s.trim())
+      );
+    }
+    var trackBase =
+      trackColorRaw && isHexColorToken(trackColorRaw)
+        ? trackColorRaw.trim()
+        : trackBaseDefault;
     var trackStyleRaw = root.getAttribute("data-track-style") || "standard";
     /** @type {Record<string, string>} */
     var trackStyleClassByName = {
@@ -139,6 +151,7 @@
       "grip-box": "percent-slider--knob-grip-box",
       "depressed-circle": "percent-slider--knob-depressed-circle",
       house: "percent-slider--knob-house",
+      "house-inverted": "percent-slider--knob-house-inverted",
     };
     var knobStyle =
       knobStyleClassByName[knobStyleRaw] ? knobStyleRaw : "depressed-circle";
@@ -159,6 +172,7 @@
     }
 
     root.style.setProperty("--percent-slider-fill", fillColor);
+    root.style.setProperty("--percent-slider-track-base", trackBase);
     root.style.setProperty("--percent-slider-tick-label-size", tickLabelSizeRaw);
     root.style.setProperty(
       "--percent-slider-tick-label-rotate",

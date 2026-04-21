@@ -85,7 +85,7 @@
         margin-top: 0.75rem;
       }
 
-      #out {
+      .demo__code-out {
         margin: 0;
         padding: 0.75rem;
         font-size: 0.78rem;
@@ -143,6 +143,10 @@
               <input id="cfgColor" type="color" value="#8b0000" />
             </label>
             <label class="demo__field">
+              Rail color
+              <input id="cfgTrackColor" type="color" value="#3a3a3a" />
+            </label>
+            <label class="demo__field">
               Knob style
               <select id="cfgStyle">
                 <option value="as-is">as-is</option>
@@ -152,6 +156,7 @@
                   depressed circle (default)
                 </option>
                 <option value="house">house</option>
+                <option value="house-inverted">house inverted</option>
               </select>
             </label>
             <label class="demo__field">
@@ -219,7 +224,11 @@
           <p style="margin: 1rem 0 0.5rem; font-size: 0.8125rem">
             <strong>percent-slider-change</strong> payload:
           </p>
-          <pre id="out">{ "value": 45 }</pre>
+          <pre id="out" class="demo__code-out">{ "value": 45 }</pre>
+          <p style="margin: 1rem 0 0.5rem; font-size: 0.8125rem">
+            <strong>Configuration</strong> (form + <code>data-*</code> snapshot):
+          </p>
+          <pre id="cfgOut" class="demo__code-out">{}</pre>
         </section>
       </div>
     </main>
@@ -230,9 +239,67 @@
         var form = document.getElementById("controlsForm");
         var mount = document.getElementById("sliderMount");
         var out = document.getElementById("out");
+        var cfgOut = document.getElementById("cfgOut");
         var tickFeedback = document.getElementById("cfgTickCustomFeedback");
-        if (!form || !mount || !out || !tickFeedback || !window.initPercentSliders) {
+        var trackColorEl = document.getElementById("cfgTrackColor");
+        if (
+          !form ||
+          !mount ||
+          !out ||
+          !cfgOut ||
+          !tickFeedback ||
+          !trackColorEl ||
+          !window.initPercentSliders
+        ) {
           return;
+        }
+
+        function buildConfigSnapshot(s, isRange) {
+          return {
+            form: {
+              mode: s.mode,
+              min: s.min,
+              max: s.max,
+              step: s.step,
+              value: s.value,
+              valueMin: s.valueMin,
+              valueMax: s.valueMax,
+              fillEnabled: s.fillEnabled,
+              fillColor: s.fillColor,
+              trackColor: s.trackColor,
+              trackStyle: s.trackStyle,
+              ticksPos: s.ticksPos,
+              tickMinor: s.tickMinor,
+              tickMajor: s.tickMajor,
+              snapMode: s.snapMode,
+              tickLabelSize: s.tickLabelSize,
+              tickLabelRotate: s.tickLabelRotate,
+              knobStyle: s.knobStyle,
+              tickCustomValid: s.tickCustomValid,
+              tickCustom: s.tickCustomValid ? JSON.parse(s.tickCustomJson) : [],
+            },
+            dataAttributes: {
+              "data-min": String(s.min),
+              "data-max": String(s.max),
+              "data-step": String(s.step),
+              "data-range": isRange ? "true" : "false",
+              "data-fill": s.fillEnabled ? "true" : "false",
+              "data-fill-color": s.fillColor,
+              "data-track-color": s.trackColor,
+              "data-track-style": s.trackStyle,
+              "data-ticks": s.ticksPos,
+              "data-tick-minor": String(s.tickMinor),
+              "data-tick-major": String(s.tickMajor),
+              "data-snap": s.snapMode,
+              "data-tick-label-size": s.tickLabelSize,
+              "data-tick-label-rotate": String(s.tickLabelRotate),
+              "data-knob-style": s.knobStyle,
+              "data-value": String(s.value),
+              "data-value-min": String(s.valueMin),
+              "data-value-max": String(s.valueMax),
+              "data-tick-custom": s.tickCustomJson,
+            },
+          };
         }
 
         function getState() {
@@ -245,6 +312,7 @@
           var valueMax = Number(document.getElementById("cfgValueMax").value);
           var fillEnabled = document.getElementById("cfgFillEnabled").checked;
           var fillColor = document.getElementById("cfgColor").value;
+          var trackColor = document.getElementById("cfgTrackColor").value;
           var trackStyle = document.getElementById("cfgTrackStyle").value;
           var ticksPos = document.getElementById("cfgTicksPos").value;
           var tickMinor = Number(document.getElementById("cfgTickMinor").value);
@@ -283,6 +351,7 @@
             valueMax: Number.isFinite(valueMax) ? valueMax : 100,
             fillEnabled: fillEnabled,
             fillColor: fillColor || "#8b0000",
+            trackColor: trackColor || "#3a3a3a",
             trackStyle: trackStyle || "standard",
             ticksPos: ticksPos || "none",
             tickMinor: Number.isFinite(tickMinor) ? tickMinor : 0,
@@ -330,28 +399,46 @@
             tickFeedback.style.color = "#166534";
           }
 
+          cfgOut.textContent = JSON.stringify(
+            buildConfigSnapshot(s, isRange),
+            null,
+            2
+          );
+
           var knobMarkup = isRange
             ? '<div class="percent-slider__knob" data-slider-knob-min><span class="percent-slider__knob-inner" aria-hidden="true"></span></div>' +
               '<div class="percent-slider__knob" data-slider-knob-max><span class="percent-slider__knob-inner" aria-hidden="true"></span></div>'
             : '<div class="percent-slider__knob" data-slider-knob><span class="percent-slider__knob-inner" aria-hidden="true"></span></div>';
 
-          var fieldMarkup = isRange
-            ? '<div class="percent-slider__field percent-slider__field--range">' +
-              '<div class="percent-slider__bound">' +
-              '<span class="percent-slider__bound-label">Min</span>' +
-              '<input type="number" class="percent-slider__input percent-slider__input--bound" data-slider-input-min aria-label="Minimum value" />' +
-              '<span class="percent-slider__suffix">%</span>' +
-              "</div>" +
-              '<div class="percent-slider__bound">' +
-              '<span class="percent-slider__bound-label">Max</span>' +
-              '<input type="number" class="percent-slider__input percent-slider__input--bound" data-slider-input-max aria-label="Maximum value" />' +
-              '<span class="percent-slider__suffix">%</span>' +
-              "</div>" +
-              "</div>"
-            : '<div class="percent-slider__field">' +
-              '<input type="number" class="percent-slider__input" data-slider-input aria-labelledby="demoSliderLabel" />' +
-              '<span class="percent-slider__suffix">%</span>' +
-              "</div>";
+          var fieldSingleMarkup =
+            '<div class="percent-slider__field">' +
+            '<input type="number" class="percent-slider__input" data-slider-input aria-labelledby="demoSliderLabel" />' +
+            '<span class="percent-slider__suffix">%</span>' +
+            "</div>";
+
+          var fieldMinMarkup =
+            '<div class="percent-slider__field percent-slider__field--range-min">' +
+            '<input type="number" class="percent-slider__input percent-slider__input--bound" data-slider-input-min aria-label="Minimum value" />' +
+            '<span class="percent-slider__suffix">%</span>' +
+            "</div>";
+
+          var fieldMaxMarkup =
+            '<div class="percent-slider__field percent-slider__field--range-max">' +
+            '<input type="number" class="percent-slider__input percent-slider__input--bound" data-slider-input-max aria-label="Maximum value" />' +
+            '<span class="percent-slider__suffix">%</span>' +
+            "</div>";
+
+          var trackBlockMarkup =
+            '<div class="percent-slider__track-area">' +
+            '<div class="percent-slider__track" data-slider-track>' +
+            '<div class="percent-slider__fill" data-slider-fill></div>' +
+            "</div>" +
+            knobMarkup +
+            "</div>";
+
+          var rowMarkup = isRange
+            ? fieldMinMarkup + trackBlockMarkup + fieldMaxMarkup
+            : trackBlockMarkup + fieldSingleMarkup;
 
           mount.innerHTML =
             '<div class="percent-slider-block" role="group" aria-labelledby="demoSliderLabel">' +
@@ -370,6 +457,8 @@
             (s.fillEnabled ? "true" : "false") +
             '" data-fill-color="' +
             s.fillColor +
+            '" data-track-color="' +
+            s.trackColor +
             '" data-track-style="' +
             s.trackStyle +
             '" data-ticks="' +
@@ -394,13 +483,7 @@
             s.valueMax +
             '">' +
             '<div class="percent-slider__row">' +
-            '<div class="percent-slider__track-area">' +
-            '<div class="percent-slider__track" data-slider-track>' +
-            '<div class="percent-slider__fill" data-slider-fill></div>' +
-            "</div>" +
-            knobMarkup +
-            "</div>" +
-            fieldMarkup +
+            rowMarkup +
             "</div>" +
             "</div>" +
             "</div>";
