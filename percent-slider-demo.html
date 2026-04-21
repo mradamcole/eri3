@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Percent slider — knob variants demo</title>
+    <link rel="stylesheet" href="percent-slider.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 1.5rem;
+        font-family: system-ui, sans-serif;
+        background: #f1f5f9;
+        color: #0f172a;
+      }
+
+      .demo {
+        max-width: 54rem;
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin: 0 0 0.5rem;
+        font-size: 1.35rem;
+      }
+
+      p {
+        margin: 0 0 1rem;
+        color: #334155;
+      }
+
+      .demo__grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+      }
+
+      .demo__panel {
+        background: #fff;
+        border: 1px solid #d9e0ea;
+        border-radius: 10px;
+        padding: 1rem;
+      }
+
+      .demo__controls {
+        display: grid;
+        gap: 0.65rem;
+      }
+
+      .demo__field {
+        display: grid;
+        gap: 0.25rem;
+        font-size: 0.875rem;
+      }
+
+      .demo__field input,
+      .demo__field select {
+        font: inherit;
+        padding: 0.35rem 0.5rem;
+        border: 1px solid #c9d3e0;
+        border-radius: 6px;
+        background: #fff;
+      }
+
+      .demo__check {
+        display: flex;
+        gap: 0.45rem;
+        align-items: center;
+        font-size: 0.875rem;
+      }
+
+      .demo__slider-wrap {
+        margin-top: 0.75rem;
+      }
+
+      #out {
+        margin: 0;
+        padding: 0.75rem;
+        font-size: 0.78rem;
+        background: #0f172a;
+        color: #e2e8f0;
+        border-radius: 8px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="demo">
+      <h1>Percent slider knob variants</h1>
+      <p>
+        Adjust the controls and test drag, keyboard arrows, Home/End, and manual
+        value input.
+      </p>
+
+      <div class="demo__grid">
+        <section class="demo__panel">
+          <form class="demo__controls" id="controlsForm">
+            <label class="demo__field">
+              Min
+              <input id="cfgMin" type="number" value="0" />
+            </label>
+            <label class="demo__field">
+              Max
+              <input id="cfgMax" type="number" value="100" />
+            </label>
+            <label class="demo__field">
+              Step
+              <input id="cfgStep" type="number" value="5" min="1" />
+            </label>
+            <label class="demo__field">
+              Value
+              <input id="cfgValue" type="number" value="45" />
+            </label>
+            <label class="demo__field">
+              Fill color
+              <input id="cfgColor" type="color" value="#8b0000" />
+            </label>
+            <label class="demo__field">
+              Knob style
+              <select id="cfgStyle">
+                <option value="as-is">as-is</option>
+                <option value="simple-circle">simple circle</option>
+                <option value="grip-box">grip box</option>
+                <option value="depressed-circle" selected>
+                  depressed circle (default)
+                </option>
+                <option value="house">house</option>
+              </select>
+            </label>
+            <label class="demo__field">
+              Track style
+              <select id="cfgTrackStyle">
+                <option value="standard" selected>standard</option>
+                <option value="depressed">depressed</option>
+              </select>
+            </label>
+            <label class="demo__check">
+              <input id="cfgFillEnabled" type="checkbox" checked />
+              Fill left side of knob
+            </label>
+          </form>
+        </section>
+
+        <section class="demo__panel">
+          <div class="demo__slider-wrap" id="sliderMount"></div>
+          <p style="margin: 1rem 0 0.5rem; font-size: 0.8125rem">
+            <strong>percent-slider-change</strong> payload:
+          </p>
+          <pre id="out">{ "value": 45 }</pre>
+        </section>
+      </div>
+    </main>
+
+    <script src="percent-slider.js"></script>
+    <script>
+      (function () {
+        var form = document.getElementById("controlsForm");
+        var mount = document.getElementById("sliderMount");
+        var out = document.getElementById("out");
+        if (!form || !mount || !out || !window.initPercentSliders) {
+          return;
+        }
+
+        function getState() {
+          var min = Number(document.getElementById("cfgMin").value);
+          var max = Number(document.getElementById("cfgMax").value);
+          var step = Number(document.getElementById("cfgStep").value);
+          var value = Number(document.getElementById("cfgValue").value);
+          var fillEnabled = document.getElementById("cfgFillEnabled").checked;
+          var fillColor = document.getElementById("cfgColor").value;
+          var trackStyle = document.getElementById("cfgTrackStyle").value;
+          var knobStyle = document.getElementById("cfgStyle").value;
+          return {
+            min: Number.isFinite(min) ? min : 0,
+            max: Number.isFinite(max) ? max : 100,
+            step: Number.isFinite(step) ? step : 5,
+            value: Number.isFinite(value) ? value : 0,
+            fillEnabled: fillEnabled,
+            fillColor: fillColor || "#8b0000",
+            trackStyle: trackStyle || "standard",
+            knobStyle: knobStyle || "depressed-circle",
+          };
+        }
+
+        function renderSlider() {
+          var s = getState();
+          if (s.max <= s.min) {
+            s.max = s.min + 1;
+          }
+          if (s.step <= 0) {
+            s.step = 1;
+          }
+
+          mount.innerHTML =
+            '<div class="percent-slider-block" role="group" aria-labelledby="demoSliderLabel">' +
+            '<span class="percent-slider-block__label" id="demoSliderLabel">Live slider demo</span>' +
+            '<div class="percent-slider" aria-labelledby="demoSliderLabel" data-min="' +
+            s.min +
+            '" data-max="' +
+            s.max +
+            '" data-step="' +
+            s.step +
+            '" data-fill="' +
+            (s.fillEnabled ? "true" : "false") +
+            '" data-fill-color="' +
+            s.fillColor +
+            '" data-track-style="' +
+            s.trackStyle +
+            '" data-knob-style="' +
+            s.knobStyle +
+            '" data-value="' +
+            s.value +
+            '">' +
+            '<div class="percent-slider__row">' +
+            '<div class="percent-slider__track-area">' +
+            '<div class="percent-slider__track" data-slider-track>' +
+            '<div class="percent-slider__fill" data-slider-fill></div>' +
+            "</div>" +
+            '<div class="percent-slider__knob" data-slider-knob>' +
+            '<span class="percent-slider__knob-inner" aria-hidden="true"></span>' +
+            "</div>" +
+            "</div>" +
+            '<div class="percent-slider__field">' +
+            '<input type="number" class="percent-slider__input" data-slider-input aria-labelledby="demoSliderLabel" />' +
+            '<span class="percent-slider__suffix">%</span>' +
+            "</div>" +
+            "</div>" +
+            "</div>" +
+            "</div>";
+
+          window.initPercentSliders(mount);
+          var slider = mount.querySelector(".percent-slider");
+          if (!slider) {
+            return;
+          }
+          slider.addEventListener("percent-slider-change", function (ev) {
+            out.textContent = JSON.stringify({ value: ev.detail.value }, null, 2);
+            document.getElementById("cfgValue").value = String(ev.detail.value);
+          });
+          if (slider.percentSlider) {
+            out.textContent = JSON.stringify(
+              { value: slider.percentSlider.getValue() },
+              null,
+              2
+            );
+          }
+        }
+
+        form.addEventListener("input", renderSlider);
+        form.addEventListener("change", renderSlider);
+        renderSlider();
+      })();
+    </script>
+  </body>
+</html>

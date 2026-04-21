@@ -72,6 +72,31 @@
     var fillAttr = root.getAttribute("data-fill");
     var fillEnabled = fillAttr !== "false" && fillAttr !== "0";
     var fillColor = root.getAttribute("data-fill-color") || "#8b0000";
+    var trackStyleRaw = root.getAttribute("data-track-style") || "standard";
+    /** @type {Record<string, string>} */
+    var trackStyleClassByName = {
+      standard: "percent-slider--track-standard",
+      depressed: "percent-slider--track-depressed",
+    };
+    var trackStyle =
+      trackStyleClassByName[trackStyleRaw] ? trackStyleRaw : "standard";
+    var trackClassList = Object.keys(trackStyleClassByName).map(function (k) {
+      return trackStyleClassByName[k];
+    });
+    var knobStyleRaw = root.getAttribute("data-knob-style") || "depressed-circle";
+    /** @type {Record<string, string>} */
+    var knobStyleClassByName = {
+      "as-is": "percent-slider--knob-as-is",
+      "simple-circle": "percent-slider--knob-circle",
+      "grip-box": "percent-slider--knob-grip-box",
+      "depressed-circle": "percent-slider--knob-depressed-circle",
+      house: "percent-slider--knob-house",
+    };
+    var knobStyle =
+      knobStyleClassByName[knobStyleRaw] ? knobStyleRaw : "depressed-circle";
+    var knobClassList = Object.keys(knobStyleClassByName).map(function (k) {
+      return knobStyleClassByName[k];
+    });
 
     if (!(max > min) || !(step > 0)) {
       if (typeof console !== "undefined" && console.warn) {
@@ -86,6 +111,14 @@
     }
 
     root.style.setProperty("--percent-slider-fill", fillColor);
+    for (var tc = 0; tc < trackClassList.length; tc++) {
+      root.classList.remove(trackClassList[tc]);
+    }
+    root.classList.add(trackStyleClassByName[trackStyle]);
+    for (var kc = 0; kc < knobClassList.length; kc++) {
+      root.classList.remove(knobClassList[kc]);
+    }
+    root.classList.add(knobStyleClassByName[knobStyle]);
     if (!fillEnabled) {
       root.classList.add("percent-slider--no-fill");
     } else {
@@ -139,7 +172,7 @@
       var r = ratioFromValue();
       var pct = r * 100;
       fill.style.width = pct + "%";
-      knob.style.left = pct + "%";
+      root.style.setProperty("--percent-slider-pos", pct + "%");
       knob.setAttribute("aria-valuenow", String(value));
       knob.setAttribute("aria-valuetext", value + "%");
       if (!fromInput) {
