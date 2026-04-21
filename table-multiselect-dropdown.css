@@ -190,10 +190,10 @@
   padding: 0.65rem 0.85rem;
   font-size: 0.8125rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #f8fafc;
   text-align: left;
   white-space: nowrap;
-  background: #f8fafc;
+  background: #64748b;
 }
 
 .tmsd__table tbody td {
