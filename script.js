@@ -5,8 +5,6 @@
   var DEBUG = false;
 
   var STORAGE_KEY = "eri_session_meta";
-  var ACK_NOTICE_KEY = "eri_ack_suppress_until";
-  var ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 
   var startBtn = document.getElementById("startBtn");
   var dialog = document.getElementById("entryDialog");
@@ -16,30 +14,6 @@
 
   if (!startBtn || !dialog || !proceedBtn || !persistCheckbox) {
     return;
-  }
-
-  function readAckNotice() {
-    try {
-      var raw = localStorage.getItem(ACK_NOTICE_KEY);
-      if (!raw) {
-        return null;
-      }
-      return JSON.parse(raw);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  function shouldSkipAcknowledgment() {
-    var data = readAckNotice();
-    if (!data || !data.acknowledgedAt) {
-      return false;
-    }
-    var t = Date.parse(data.acknowledgedAt);
-    if (Number.isNaN(t)) {
-      return false;
-    }
-    return Date.now() < t + ONE_YEAR_MS;
   }
 
   function setProceedEnabled(enabled) {
@@ -55,28 +29,6 @@
       }
     }
     setProceedEnabled(any);
-  }
-
-  function persistAckPreference(role) {
-    if (persistCheckbox.checked) {
-      try {
-        localStorage.setItem(
-          ACK_NOTICE_KEY,
-          JSON.stringify({
-            acknowledgedAt: new Date().toISOString(),
-            role: role,
-          })
-        );
-      } catch (e) {
-        /* ignore quota / private mode */
-      }
-    } else {
-      try {
-        localStorage.removeItem(ACK_NOTICE_KEY);
-      } catch (e) {
-        /* ignore */
-      }
-    }
   }
 
   function getSelectedRole() {
@@ -109,10 +61,6 @@
       console.info("[ERI]", meta);
     }
 
-    if (shouldSkipAcknowledgment()) {
-      return;
-    }
-
     dialog.showModal();
   }
 
@@ -125,8 +73,8 @@
     if (!role) {
       return;
     }
-    persistAckPreference(role);
     dialog.close();
+    window.location.href = "template.html";
   });
 
   dialog.addEventListener("close", function () {
