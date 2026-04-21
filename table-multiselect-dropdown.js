@@ -663,8 +663,12 @@
       closePanel();
     }
 
-    function onWinReposition() {
+    function onWinReposition(ev) {
       if (open) {
+        var tgt = ev && ev.target ? /** @type {HTMLElement} */ (ev.target) : null;
+        if (ev && ev.type === "scroll" && tgt === panelInner) {
+          return;
+        }
         positionPanel();
       }
     }
