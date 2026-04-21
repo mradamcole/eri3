@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="template-shell.css" />
     <link rel="stylesheet" href="chevron-progress.css" />
+    <link rel="stylesheet" href="percent-slider.css" />
   </head>
   <body>
     <div class="app-shell">
@@ -17,6 +18,8 @@
 
       <main class="app-shell__main" role="main">
         <div class="app-shell__cards">
+          <div class="app-shell__col app-shell__col--left">
+          <div class="app-shell__cards-stack">
           <details class="app-shell__card app-shell__card--collapsible" open>
             <summary class="app-shell__card-summary">
               <span class="app-shell__card-chevron" aria-hidden="true">
@@ -448,6 +451,80 @@
             </div>
           </details>
 
+          <details class="app-shell__card app-shell__card--collapsible" open>
+            <summary class="app-shell__card-summary">
+              <span class="app-shell__card-chevron" aria-hidden="true">
+                <svg
+                  class="app-shell__card-chevron-svg"
+                  width="10"
+                  height="10"
+                  viewBox="0 0 10 10"
+                  focusable="false"
+                >
+                  <polygon points="2,1 9,5 2,9" fill="currentColor" />
+                </svg>
+              </span>
+              <h2 class="app-shell__card-title">Formulation</h2>
+            </summary>
+            <div class="app-shell__card-body">
+              <div class="formulation">
+                <div
+                  class="percent-slider-block"
+                  role="group"
+                  aria-labelledby="formulationPercentLabel"
+                >
+                  <span
+                    class="percent-slider-block__label"
+                    id="formulationPercentLabel"
+                  >
+                    Example relative weight (0–100%, step 5)
+                  </span>
+                  <div
+                    class="percent-slider"
+                    aria-labelledby="formulationPercentLabel"
+                    data-min="0"
+                    data-max="100"
+                    data-step="5"
+                    data-fill="true"
+                    data-value="45"
+                  >
+                    <div class="percent-slider__row">
+                      <div class="percent-slider__track-area">
+                        <div
+                          class="percent-slider__track"
+                          data-slider-track
+                        >
+                          <div
+                            class="percent-slider__fill"
+                            data-slider-fill
+                          ></div>
+                        </div>
+                        <div class="percent-slider__knob" data-slider-knob>
+                          <span
+                            class="percent-slider__knob-inner"
+                            aria-hidden="true"
+                          ></span>
+                        </div>
+                      </div>
+                      <div class="percent-slider__field">
+                        <input
+                          type="number"
+                          class="percent-slider__input"
+                          data-slider-input
+                          aria-labelledby="formulationPercentLabel"
+                        />
+                        <span class="percent-slider__suffix">%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </details>
+          </div>
+          </div>
+
+          <div class="app-shell__col app-shell__col--right">
           <article class="app-shell__card">
             <header class="app-shell__card-header">
               <h2 class="app-shell__card-title">Evidence Synthesis</h2>
@@ -688,6 +765,7 @@
               </div>
             </div>
           </article>
+          </div>
         </div>
       </main>
 
@@ -721,5 +799,6 @@
     </div>
     <script src="chevron-progress.js" defer></script>
     <script src="template.js" defer></script>
+    <script src="percent-slider.js" defer></script>
   </body>
 </html>

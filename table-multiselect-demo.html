@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Table multiselect dropdown — demo</title>
+    <link rel="stylesheet" href="table-multiselect-dropdown.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 1.5rem;
+        font-family: system-ui, sans-serif;
+        background: #f1f5f9;
+        color: #0f172a;
+      }
+      .demo-wrap {
+        max-width: 42rem;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem;
+      }
+      p {
+        margin: 0 0 1rem;
+        font-size: 0.875rem;
+        color: #475569;
+      }
+      #mount {
+        margin-bottom: 1.5rem;
+      }
+      pre {
+        margin: 0;
+        padding: 1rem;
+        font-size: 0.75rem;
+        background: #0f172a;
+        color: #e2e8f0;
+        border-radius: 8px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="demo-wrap">
+      <h1>Table multiselect dropdown</h1>
+      <p>
+        Type to filter rows. Use the chevron or focus the field to open the
+        table. Click rows or use arrow keys and Space/Enter to toggle selection.
+      </p>
+      <div id="mount"></div>
+      <p style="font-size: 0.8125rem"><strong>onChange</strong> payload:</p>
+      <pre id="out">[]</pre>
+    </div>
+    <script src="table-multiselect-dropdown.js"></script>
+    <script>
+      (function () {
+        var mount = document.getElementById("mount");
+        var out = document.getElementById("out");
+        var api = window.TableMultiselectDropdown;
+        if (!api || !mount) return;
+
+        var opts = Object.assign({}, api.EXAMPLE_FORMAT_OPTIONS, {
+          placeholder: "Search formats…",
+          ariaLabel: "Delivery formats",
+          multiple: true,
+          onChange: function (rows) {
+            out.textContent = JSON.stringify(rows, null, 2);
+          },
+        });
+
+        api.create(mount, opts);
+      })();
+    </script>
+  </body>
+</html>
