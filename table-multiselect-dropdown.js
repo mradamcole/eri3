@@ -886,10 +886,130 @@
     ]),
   };
 
+  /** Illustrative cannabinoid reference rows (replace with canonical copy as needed). */
+  var EXAMPLE_CANNABINOID_OPTIONS = {
+    columns: [
+      "Compound",
+      "Primary Effects",
+      "Common Clinical Use Cases",
+      "Psychoactivity",
+      "Onset Influence",
+      "Evidence Strength",
+      "Key Risks / Considerations",
+    ],
+    rows: /** @type {unknown[]} */ ([
+      {
+        type: "data",
+        id: "thc-d9",
+        cells: [
+          "THC (delta-9)",
+          "Euphoria, analgesia, antiemetic (context-dependent)",
+          "Nausea/vomiting, pain, spasticity (where legally indicated)",
+          "Yes (dose- and route-dependent)",
+          "Faster if inhaled; slower if oral",
+          "Moderate–high (indication-specific)",
+          "Impairment, anxiety/paranoia, CV effects; drug interactions",
+        ],
+      },
+      {
+        type: "data",
+        id: "cbd",
+        cells: [
+          "CBD",
+          "Anxiolysis, anti-inflammatory signals (non-THC predominant)",
+          "Adjunct symptom support; specific epilepsy syndromes (regulated products)",
+          "Minimal at typical therapeutic exposures",
+          "Highly formulation-dependent",
+          "High for select epilepsy syndromes; otherwise variable",
+          "Hepatic enzyme interactions; product quality variance",
+        ],
+      },
+      {
+        type: "data",
+        id: "cbg",
+        cells: [
+          "CBG",
+          "Preclinical anti-inflammatory/analgesic interest",
+          "Research context; not a first-line clinical target in most settings",
+          "Generally low vs THC at comparable exposures",
+          "Similar drivers to other oral/sublingual cannabinoids",
+          "Low–moderate human outcome data",
+          "Limited long-term safety datasets; formulation variability",
+        ],
+      },
+      {
+        type: "data",
+        id: "cbc",
+        cells: [
+          "CBC",
+          "Preclinical neuromodulatory/anti-inflammatory interest",
+          "Primarily research; limited established clinical pathways",
+          "Low at common exposures",
+          "Follows product matrix and route",
+          "Low in humans",
+          "Sparse dosing guidance; quality control concerns",
+        ],
+      },
+      {
+        type: "data",
+        id: "cbn",
+        cells: [
+          "CBN",
+          "Sedation attributed in consumer products (evidence mixed)",
+          "Sleep (often marketed); evidence not uniform",
+          "Milder than THC for many patients (not absent)",
+          "Route-dependent",
+          "Low–moderate",
+          "Additive sedation with CNS depressants; next-day effects",
+        ],
+      },
+      {
+        type: "data",
+        id: "thcv",
+        cells: [
+          "THCV",
+          "Dose-dependent CB1 effects; research interest in metabolism",
+          "Specialty research; not routine first-line",
+          "Context-dependent (often lower intoxication than THC at some doses)",
+          "Similar route drivers to THC",
+          "Low–moderate",
+          "Limited long-term data; THC-like monitoring may still apply",
+        ],
+      },
+      {
+        type: "data",
+        id: "cbdv",
+        cells: [
+          "CBDV",
+          "Preclinical anticonvulsant/anxiety-related signals",
+          "Research / niche investigational contexts",
+          "Low at common exposures",
+          "Formulation-dependent",
+          "Low in humans",
+          "Immature evidence base; product labeling variance",
+        ],
+      },
+      {
+        type: "data",
+        id: "d8-thc",
+        cells: [
+          "THC (delta-8)",
+          "THC-like effects reported (potency varies by product)",
+          "Not interchangeable with delta-9; regulatory status varies",
+          "Yes (dose-dependent; potency inconsistent across products)",
+          "Similar route drivers to THC",
+          "Low vs delta-9 for many outcomes",
+          "Impairment; contaminants/synthesis byproducts in unregulated supply",
+        ],
+      },
+    ]),
+  };
+
   var api = {
     create: create,
     init: init,
     EXAMPLE_FORMAT_OPTIONS: EXAMPLE_FORMAT_OPTIONS,
+    EXAMPLE_CANNABINOID_OPTIONS: EXAMPLE_CANNABINOID_OPTIONS,
   };
 
   /** @type {Window & { TableMultiselectDropdown?: typeof api }} */

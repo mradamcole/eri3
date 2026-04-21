@@ -302,9 +302,35 @@
     selectTab(0);
   }
 
+  function initFormulationFormatSelect() {
+    const mount = document.getElementById("formulationFormatTmsd");
+    const api = window.TableMultiselectDropdown;
+    if (!mount || !api || typeof api.create !== "function") return;
+    api.create(mount, {
+      ...api.EXAMPLE_FORMAT_OPTIONS,
+      placeholder: "Search delivery formats…",
+      ariaLabel: "Delivery formats",
+      multiple: true,
+    });
+  }
+
+  function initFormulationCannabinoidSelect() {
+    const mount = document.getElementById("formulationCannabinoidTmsd");
+    const api = window.TableMultiselectDropdown;
+    if (!mount || !api || typeof api.create !== "function") return;
+    api.create(mount, {
+      ...api.EXAMPLE_CANNABINOID_OPTIONS,
+      placeholder: "Search cannabinoids…",
+      ariaLabel: "Cannabinoids of interest",
+      multiple: true,
+    });
+  }
+
   function initTemplatePage() {
     initConditionCombobox();
     initEvidenceCard();
+    initFormulationFormatSelect();
+    initFormulationCannabinoidSelect();
   }
 
   if (document.readyState === "loading") {

@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="template-shell.css" />
     <link rel="stylesheet" href="chevron-progress.css" />
     <link rel="stylesheet" href="percent-slider.css" />
+    <link rel="stylesheet" href="table-multiselect-dropdown.css" />
   </head>
   <body>
     <div class="app-shell">
@@ -451,7 +452,10 @@
             </div>
           </details>
 
-          <details class="app-shell__card app-shell__card--collapsible" open>
+          <details
+            class="app-shell__card app-shell__card--collapsible app-shell__card--formulation"
+            open
+          >
             <summary class="app-shell__card-summary">
               <span class="app-shell__card-chevron" aria-hidden="true">
                 <svg
@@ -468,6 +472,32 @@
             </summary>
             <div class="app-shell__card-body">
               <div class="formulation">
+                <div
+                  class="formulation__formats"
+                  role="group"
+                  aria-labelledby="formulationFormatsLabel"
+                >
+                  <div
+                    class="formulation__formats-label"
+                    id="formulationFormatsLabel"
+                  >
+                    Delivery formats
+                  </div>
+                  <div id="formulationFormatTmsd"></div>
+                </div>
+                <div
+                  class="formulation__cannabinoids"
+                  role="group"
+                  aria-labelledby="formulationCannabinoidsLabel"
+                >
+                  <div
+                    class="formulation__cannabinoids-label"
+                    id="formulationCannabinoidsLabel"
+                  >
+                    Cannabinoids of interest
+                  </div>
+                  <div id="formulationCannabinoidTmsd"></div>
+                </div>
                 <div
                   class="percent-slider-block"
                   role="group"
@@ -798,6 +828,7 @@
       </footer>
     </div>
     <script src="chevron-progress.js" defer></script>
+    <script src="table-multiselect-dropdown.js" defer></script>
     <script src="template.js" defer></script>
     <script src="percent-slider.js" defer></script>
   </body>

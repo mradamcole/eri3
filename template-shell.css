@@ -85,7 +85,24 @@ body {
   min-width: 0;
 }
 
-.formulation .percent-slider-block:first-child {
+.formulation__formats {
+  margin-bottom: 1rem;
+}
+
+.formulation__formats-label,
+.formulation__cannabinoids-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #595959;
+}
+
+.formulation__cannabinoids {
+  margin-bottom: 0.25rem;
+}
+
+.formulation .formulation__cannabinoids + .percent-slider-block {
   margin-top: 0;
 }
 
@@ -161,6 +178,10 @@ body {
 
 .app-shell__card--collapsible[open] .app-shell__card-chevron {
   transform: rotate(90deg);
+}
+
+.app-shell__card--formulation[open] {
+  min-height: 600px;
 }
 
 .app-shell__card-chevron-svg {

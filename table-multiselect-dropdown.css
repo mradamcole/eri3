@@ -6,8 +6,9 @@
   --tmsd-bg: #fff;
   --tmsd-focus: #2563eb;
   --tmsd-selected: #dbeafe;
-  --tmsd-hover-glow: 0 0 0 2px rgba(37, 99, 235, 0.55),
-    0 6px 28px rgba(37, 99, 235, 0.35), 0 0 48px rgba(37, 99, 235, 0.22);
+  /* Tight electric edge + small halo (cyan-forward for a fluorescent read) */
+  --tmsd-hover-glow: 0 0 0 1px rgba(125, 211, 252, 0.95),
+    0 0 0 2px rgba(34, 211, 238, 0.55), 0 0 6px 1px rgba(6, 182, 212, 0.65);
   --tmsd-pill-bg: #eef2f7;
   --tmsd-pill-border: #d0d7e0;
   --tmsd-font: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
@@ -145,6 +146,12 @@
 
 .tmsd--open .tmsd__toggle-icon {
   transform: rotate(180deg);
+}
+
+/* Later siblings (e.g. percent slider) paint above this widget by default; lift
+   the whole .tmsd stacking context while open so the fixed panel stays on top. */
+.tmsd--open {
+  z-index: calc(var(--tmsd-z-panel) + 1);
 }
 
 /* Panel: position + size set inline in JS (fixed) */
