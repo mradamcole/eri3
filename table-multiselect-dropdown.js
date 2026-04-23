@@ -1273,7 +1273,11 @@
       { label: "Route(s)" },
       { label: "Onset Speed", sortable: true, sortOrder: ["Fast", "Fast–Medium", "Medium", "Slow"] },
       { label: "Duration", sortable: true, sortOrder: ["Short", "Medium", "Medium–Long", "Long"] },
-      { label: "Dosing Precision" },
+      {
+        label: "Dosing Precision",
+        sortable: true,
+        sortOrder: ["Low", "Medium", "Medium–High", "High"],
+      },
       { label: "Pulmonary Risk", sortable: true, sortOrder: ["No", "Minor", "Yes"] },
       {
         label: "Abuse Potential",
