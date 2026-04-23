@@ -1288,7 +1288,7 @@
       },
       { label: "Onset Influence", sortable: true },
       {
-        label: "Evidence Strength",
+        label: "Confidence",
         sortable: true,
         sortOrder: ["High", "Moderate", "Low–Moderate", "Low"],
       },
