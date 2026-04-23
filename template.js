@@ -313,6 +313,7 @@
       multiple: true,
       selectAllButton: true,
       clearAllButton: true,
+      selectAllSingleClickGroupIndexes: [0],
     });
   }
 
@@ -327,6 +328,7 @@
       multiple: true,
       selectAllButton: true,
       clearAllButton: true,
+      selectAllSingleClickGroupIndexes: [0],
     });
   }
 

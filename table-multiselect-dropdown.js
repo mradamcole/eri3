@@ -11,6 +11,7 @@
 
   var MARGIN = 12;
   var GAP = 4;
+  var SELECT_ALL_DOUBLE_CLICK_DELAY_MS = 250;
 
   /**
    * @param {unknown} row
@@ -220,6 +221,7 @@
    * @param {boolean} [options.clearFilterOnClose]
    * @param {boolean} [options.selectAllButton]
    * @param {boolean} [options.clearAllButton]
+   * @param {number[]} [options.selectAllSingleClickGroupIndexes]
    * @returns {{ destroy: function (): void, getValue: function (): { id: string, cells: string[] }[], setValue: function (ids: string[]): void, open: function (): void, close: function (): void, root: HTMLElement }}
    */
   function create(container, options) {
@@ -280,7 +282,30 @@
     var clearFilterOnClose = options.clearFilterOnClose === true;
     var selectAllButtonEnabled = multiple && options.selectAllButton === true;
     var clearAllButtonEnabled = multiple && options.clearAllButton === true;
+    var rawSingleClickGroupIndexes = Array.isArray(options.selectAllSingleClickGroupIndexes)
+      ? options.selectAllSingleClickGroupIndexes
+      : null;
+    var selectAllSingleClickGroupIndexes = null;
+    if (rawSingleClickGroupIndexes && rawSingleClickGroupIndexes.length) {
+      /** @type {number[]} */
+      var normalizedGroupIndexes = [];
+      var gi;
+      for (gi = 0; gi < rawSingleClickGroupIndexes.length; gi++) {
+        var parsedGroupIndex = Number(rawSingleClickGroupIndexes[gi]);
+        if (
+          Number.isInteger(parsedGroupIndex) &&
+          parsedGroupIndex >= 0 &&
+          normalizedGroupIndexes.indexOf(parsedGroupIndex) === -1
+        ) {
+          normalizedGroupIndexes.push(parsedGroupIndex);
+        }
+      }
+      if (normalizedGroupIndexes.length) {
+        selectAllSingleClickGroupIndexes = normalizedGroupIndexes;
+      }
+    }
     var showBulk = selectAllButtonEnabled || clearAllButtonEnabled;
+    var pendingSelectAllSingleClickTimer = null;
 
     var colCount = columns.length;
 
@@ -401,7 +426,8 @@
         selectAllBtn.type = "button";
         selectAllBtn.className = "tmsd__icon-btn";
         selectAllBtn.setAttribute("aria-label", "Select all visible options");
-        selectAllBtn.title = "Select all visible options";
+        selectAllBtn.title =
+          "Single-click to add important items, double-click to add all items";
         selectAllBtn.innerHTML =
           '<span class="tmsd__icon-btn-icon" aria-hidden="true">' +
           '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="none">' +
@@ -410,6 +436,20 @@
           "</svg></span>" +
           '<span class="tmsd__icon-btn-label">All</span>';
         selectAllBtn.addEventListener("click", function () {
+          if (pendingSelectAllSingleClickTimer !== null) {
+            clearTimeout(pendingSelectAllSingleClickTimer);
+            pendingSelectAllSingleClickTimer = null;
+          }
+          pendingSelectAllSingleClickTimer = window.setTimeout(function () {
+            pendingSelectAllSingleClickTimer = null;
+            selectAllVisibleForSingleClick();
+          }, SELECT_ALL_DOUBLE_CLICK_DELAY_MS);
+        });
+        selectAllBtn.addEventListener("dblclick", function () {
+          if (pendingSelectAllSingleClickTimer !== null) {
+            clearTimeout(pendingSelectAllSingleClickTimer);
+            pendingSelectAllSingleClickTimer = null;
+          }
           selectAllVisible();
         });
         bulkWrap.appendChild(selectAllBtn);
@@ -539,6 +579,48 @@
           continue;
         }
         ids.push(model[k].id);
+      }
+      return ids;
+    }
+
+    /**
+     * Groups are divider-delimited. Rows before the first divider are group 0.
+     * If the first row is a divider, its rows are also group 0.
+     * @param {number[]} groupIndexes
+     * @returns {string[]}
+     */
+    function getVisibleDataIdsForGroups(groupIndexes) {
+      if (!groupIndexes.length) {
+        return [];
+      }
+      /** @type {Record<string, boolean>} */
+      var allowed = {};
+      var i;
+      for (i = 0; i < groupIndexes.length; i++) {
+        allowed[String(groupIndexes[i])] = true;
+      }
+      /** @type {string[]} */
+      var ids = [];
+      var currentGroupIndex = 0;
+      var hasSeenAnyData = false;
+      var hasSeenDataSinceLastDivider = false;
+      var k;
+      for (k = 0; k < model.length; k++) {
+        if (model[k].kind === "divider") {
+          if (hasSeenAnyData && hasSeenDataSinceLastDivider) {
+            currentGroupIndex += 1;
+            hasSeenDataSinceLastDivider = false;
+          }
+          continue;
+        }
+        if (!model[k].tr || model[k].tr.hidden) {
+          continue;
+        }
+        hasSeenAnyData = true;
+        hasSeenDataSinceLastDivider = true;
+        if (allowed[String(currentGroupIndex)]) {
+          ids.push(model[k].id);
+        }
       }
       return ids;
     }
@@ -823,15 +905,21 @@
       }
     }
 
-    function selectAllVisible() {
-      var visible = getVisibleDataIdsInOrder();
+    /**
+     * @param {string[]} ids
+     * @returns {void}
+     */
+    function selectIds(ids) {
+      if (!ids.length) {
+        return;
+      }
       var beforeSize = selected.size;
       var i;
-      for (i = 0; i < visible.length; i++) {
+      for (i = 0; i < ids.length; i++) {
         if (selected.size >= maxSelections) {
           break;
         }
-        var vid = visible[i];
+        var vid = ids[i];
         if (!selected.has(vid)) {
           selected.add(vid);
         }
@@ -843,6 +931,18 @@
       syncRowSelectedClass();
       renderPills();
       emitChange();
+    }
+
+    function selectAllVisibleForSingleClick() {
+      if (selectAllSingleClickGroupIndexes && selectAllSingleClickGroupIndexes.length) {
+        selectIds(getVisibleDataIdsForGroups(selectAllSingleClickGroupIndexes));
+        return;
+      }
+      selectAllVisible();
+    }
+
+    function selectAllVisible() {
+      selectIds(getVisibleDataIdsInOrder());
     }
 
     function clearAllSelection() {
@@ -1118,6 +1218,10 @@
 
     return {
       destroy: function () {
+        if (pendingSelectAllSingleClickTimer !== null) {
+          clearTimeout(pendingSelectAllSingleClickTimer);
+          pendingSelectAllSingleClickTimer = null;
+        }
         document.removeEventListener("pointerdown", onDocPointerDown, true);
         window.removeEventListener("resize", onWinReposition);
         window.removeEventListener("scroll", onWinReposition, true);
