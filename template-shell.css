@@ -109,6 +109,10 @@ body {
 
 .formulation .percent-slider-block__label {
   margin-bottom: calc(0.5rem - 10px);
+  margin-right: 6px;
+  text-align: right;
+  /* Align label to the track end (exclude bound input + suffix). */
+  padding-right: calc(3.25rem + 1ch + 0.2rem + 0.75rem);
 }
 
 .formulation__thc-slider-row {

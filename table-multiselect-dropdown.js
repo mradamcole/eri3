@@ -3,6 +3,7 @@
 
   /**
    * Table + multiselect combobox widget.
+   * Columns: { label: string, sortable?: boolean, sortOrder?: string[] }[].
    * Data rows: string[] or { type: 'data', cells: string[], id?: string }.
    * Dividers: { type: 'divider', text: string, colspan?: number }.
    * Grid pattern: role="grid" on table, aria-selected on data rows (see WAI-ARIA grid).
@@ -137,8 +138,79 @@
   }
 
   /**
+   * @param {string} value
+   * @returns {number | null}
+   */
+  function parseSortableNumber(value) {
+    var normalized = String(value).replace(/,/g, "").trim();
+    if (!normalized) {
+      return null;
+    }
+    if (!/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(normalized)) {
+      return null;
+    }
+    var num = Number(normalized);
+    return Number.isFinite(num) ? num : null;
+  }
+
+  /**
+   * @param {string} value
+   * @returns {string}
+   */
+  function normalizeSortValue(value) {
+    return String(value).trim().toLowerCase();
+  }
+
+  /**
+   * @param {TmsdDataModel} a
+   * @param {TmsdDataModel} b
+   * @param {{ index: number, sortOrder: string[], sortRankByValue: Record<string, number> }} column
+   * @returns {number}
+   */
+  function compareDataRows(a, b, column) {
+    var av = a.cells[column.index] || "";
+    var bv = b.cells[column.index] || "";
+    if (column.sortOrder.length) {
+      var aKey = normalizeSortValue(av);
+      var bKey = normalizeSortValue(bv);
+      var aRank = column.sortRankByValue[aKey];
+      var bRank = column.sortRankByValue[bKey];
+      var aInOrder = Object.prototype.hasOwnProperty.call(
+        column.sortRankByValue,
+        aKey
+      );
+      var bInOrder = Object.prototype.hasOwnProperty.call(
+        column.sortRankByValue,
+        bKey
+      );
+      if (aInOrder && bInOrder) {
+        if (aRank < bRank) {
+          return -1;
+        }
+        if (aRank > bRank) {
+          return 1;
+        }
+        return 0;
+      }
+      return String(av).localeCompare(String(bv), undefined, { sensitivity: "base" });
+    }
+    var an = parseSortableNumber(av);
+    var bn = parseSortableNumber(bv);
+    if (an !== null && bn !== null) {
+      if (an < bn) {
+        return -1;
+      }
+      if (an > bn) {
+        return 1;
+      }
+      return 0;
+    }
+    return String(av).localeCompare(String(bv), undefined, { sensitivity: "base" });
+  }
+
+  /**
    * @param {object} options
-   * @param {string[]} options.columns
+   * @param {{ label: string, sortable?: boolean, sortOrder?: string[] }[]} options.columns
    * @param {unknown[]} options.rows
    * @param {boolean} [options.multiple]
    * @param {string} [options.placeholder]
@@ -154,8 +226,48 @@
     if (!container || !options || !Array.isArray(options.columns)) {
       throw new Error("[table-multiselect-dropdown] container and options.columns required");
     }
-
-    var columns = options.columns.slice();
+    var columns = options.columns.map(function (col, idx) {
+      if (!col || typeof col !== "object" || Array.isArray(col)) {
+        throw new Error(
+          "[table-multiselect-dropdown] columns[" +
+            idx +
+            "] must be an object: { label: string, sortable?: boolean, sortOrder?: string[] }"
+        );
+      }
+      var label = /** @type {{ label?: unknown }} */ (col).label;
+      if (typeof label !== "string") {
+        throw new Error(
+          "[table-multiselect-dropdown] columns[" + idx + "].label must be a string"
+        );
+      }
+      var rawSortOrder = /** @type {{ sortOrder?: unknown }} */ (col).sortOrder;
+      if (typeof rawSortOrder !== "undefined" && !Array.isArray(rawSortOrder)) {
+        throw new Error(
+          "[table-multiselect-dropdown] columns[" + idx + "].sortOrder must be a string[]"
+        );
+      }
+      var sortOrder = Array.isArray(rawSortOrder)
+        ? rawSortOrder.map(function (v) {
+            return String(v);
+          })
+        : [];
+      /** @type {Record<string, number>} */
+      var sortRankByValue = {};
+      var rankIndex;
+      for (rankIndex = 0; rankIndex < sortOrder.length; rankIndex++) {
+        var token = normalizeSortValue(sortOrder[rankIndex]);
+        if (!Object.prototype.hasOwnProperty.call(sortRankByValue, token)) {
+          sortRankByValue[token] = rankIndex;
+        }
+      }
+      return {
+        index: idx,
+        label: label,
+        sortable: /** @type {{ sortable?: boolean }} */ (col).sortable === true,
+        sortOrder: sortOrder,
+        sortRankByValue: sortRankByValue,
+      };
+    });
     var rawRows = Array.isArray(options.rows) ? options.rows : [];
     var multiple = options.multiple !== false;
     var placeholder = options.placeholder || "Search…";
@@ -221,6 +333,13 @@
     var filterQuery = "";
     /** @type {string | null} */
     var activeRowId = null;
+    /** @type {number | null} */
+    var activeSortColumnIndex = null;
+    /** @type {'asc' | 'desc' | null} */
+    var sortDirection = null;
+    /** @type {HTMLTableCellElement[]} */
+    var headerCells = [];
+    var baseModelOrder = model.slice();
     var uidSuffix = "-" + Math.random().toString(36).slice(2, 9);
     var listId = "tmsd-list-" + uidSuffix;
 
@@ -337,8 +456,17 @@
     var c;
     for (c = 0; c < columns.length; c++) {
       var th = document.createElement("th");
+      var col = columns[c];
+      headerCells.push(th);
       th.scope = "col";
-      th.textContent = String(columns[c]);
+      th.textContent = col.label;
+      th.className = "tmsd__th";
+      if (col.sortable) {
+        th.classList.add("tmsd__th--sortable");
+        th.setAttribute("aria-sort", "none");
+        th.setAttribute("data-sort-state", "none");
+        th.tabIndex = 0;
+      }
       thr.appendChild(th);
     }
     thead.appendChild(thr);
@@ -413,6 +541,107 @@
         ids.push(model[k].id);
       }
       return ids;
+    }
+
+    function updateHeaderSortState() {
+      var i;
+      for (i = 0; i < columns.length; i++) {
+        if (!columns[i].sortable || !headerCells[i]) {
+          continue;
+        }
+        var state = "none";
+        if (activeSortColumnIndex === i && sortDirection) {
+          state = sortDirection === "asc" ? "ascending" : "descending";
+        }
+        headerCells[i].setAttribute("aria-sort", state);
+        headerCells[i].setAttribute("data-sort-state", state);
+      }
+    }
+
+    function reorderBodyRowsToModelOrder() {
+      var i;
+      for (i = 0; i < model.length; i++) {
+        if (model[i].tr) {
+          tbody.appendChild(model[i].tr);
+        }
+      }
+    }
+
+    function getModelForCurrentSort() {
+      if (activeSortColumnIndex === null || !sortDirection) {
+        return baseModelOrder.slice();
+      }
+      var direction = sortDirection === "asc" ? 1 : -1;
+      /** @type {TmsdNormalizedRow[]} */
+      var next = [];
+      /** @type {TmsdDividerModel | null} */
+      var currentDivider = null;
+      /** @type {TmsdDataModel[]} */
+      var currentData = [];
+
+      function flushGroup() {
+        if (currentDivider) {
+          next.push(currentDivider);
+        }
+        if (!currentData.length) {
+          return;
+        }
+        var stabilized = currentData.map(function (row, index) {
+          return { row: row, index: index };
+        });
+        var activeColumn = columns[activeSortColumnIndex];
+        stabilized.sort(function (a, b) {
+          var cmp = compareDataRows(a.row, b.row, activeColumn);
+          if (cmp === 0) {
+            return a.index - b.index;
+          }
+          return cmp * direction;
+        });
+        var i;
+        for (i = 0; i < stabilized.length; i++) {
+          next.push(stabilized[i].row);
+        }
+      }
+
+      var i;
+      for (i = 0; i < baseModelOrder.length; i++) {
+        var item = baseModelOrder[i];
+        if (item.kind === "divider") {
+          flushGroup();
+          currentDivider = item;
+          currentData = [];
+        } else {
+          currentData.push(item);
+        }
+      }
+      flushGroup();
+      return next;
+    }
+
+    function applySortModel() {
+      model = getModelForCurrentSort();
+      reorderBodyRowsToModelOrder();
+      updateHeaderSortState();
+      applyFilter();
+    }
+
+    function toggleSortForColumn(columnIndex) {
+      if (!columns[columnIndex] || !columns[columnIndex].sortable) {
+        return;
+      }
+      if (activeSortColumnIndex !== columnIndex) {
+        activeSortColumnIndex = columnIndex;
+        sortDirection = "asc";
+      } else if (sortDirection === "asc") {
+        sortDirection = "desc";
+      } else if (sortDirection === "desc") {
+        activeSortColumnIndex = null;
+        sortDirection = null;
+      } else {
+        sortDirection = "asc";
+      }
+      applySortModel();
+      positionPanel();
     }
 
     function setActiveRow(id) {
@@ -846,6 +1075,25 @@
       }
     });
 
+    var hc;
+    for (hc = 0; hc < headerCells.length; hc++) {
+      if (!columns[hc].sortable) {
+        continue;
+      }
+      (function (columnIndex) {
+        var th = headerCells[columnIndex];
+        th.addEventListener("click", function () {
+          toggleSortForColumn(columnIndex);
+        });
+        th.addEventListener("keydown", function (ev) {
+          if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault();
+            toggleSortForColumn(columnIndex);
+          }
+        });
+      })(hc);
+    }
+
     tbody.addEventListener("click", function (ev) {
       var tr = /** @type {HTMLElement} */ (ev.target).closest("tr");
       if (!tr || !tr.classList.contains("tmsd__data-row")) {
@@ -862,6 +1110,7 @@
       setActiveRow(rid);
     });
 
+    updateHeaderSortState();
     applyFilter();
     syncRowAriaSelected();
     syncRowSelectedClass();
@@ -916,13 +1165,17 @@
   /** Example dataset matching the pharmacology formats screenshot. */
   var EXAMPLE_FORMAT_OPTIONS = {
     columns: [
-      "Format",
-      "Route(s)",
-      "Onset Speed",
-      "Duration",
-      "Dosing Precision",
-      "Pulmonary Risk",
-      "Abuse Potential",
+      { label: "Format", sortable: true },
+      { label: "Route(s)" },
+      { label: "Onset Speed", sortable: true, sortOrder: ["Fast", "Fast–Medium", "Medium", "Slow"] },
+      { label: "Duration", sortable: true, sortOrder: ["Short", "Medium", "Medium–Long", "Long"] },
+      { label: "Dosing Precision" },
+      { label: "Pulmonary Risk", sortable: true, sortOrder: ["No", "Minor", "Yes"] },
+      {
+        label: "Abuse Potential",
+        sortable: true,
+        sortOrder: ["Low", "Low–Medium", "Medium", "High", "Very High"],
+      },
     ],
     rows: /** @type {unknown[]} */ ([
       [
@@ -1025,13 +1278,21 @@
   /** Illustrative cannabinoid reference rows (replace with canonical copy as needed). */
   var EXAMPLE_CANNABINOID_OPTIONS = {
     columns: [
-      "Compound",
-      "Primary Effects",
-      "Common Clinical Use Cases",
-      "Psychoactivity",
-      "Onset Influence",
-      "Evidence Strength",
-      "Key Risks / Considerations",
+      { label: "Compound", sortable: true },
+      { label: "Primary Effects" },
+      { label: "Common Clinical Use Cases" },
+      {
+        label: "Psychoactivity",
+        sortable: true,
+        sortOrder: ["None", "Low", "Low–Moderate", "Moderate", "High"],
+      },
+      { label: "Onset Influence", sortable: true },
+      {
+        label: "Evidence Strength",
+        sortable: true,
+        sortOrder: ["High", "Moderate", "Low–Moderate", "Low"],
+      },
+      { label: "Key Risks / Considerations" },
     ],
     rows: /** @type {unknown[]} */ ([
       { type: "divider", text: "Cannabinoids" },
