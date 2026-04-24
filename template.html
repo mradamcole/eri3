@@ -500,21 +500,66 @@
                 </div>
                 <details class="formulation__advanced" id="formulationAdvanced">
                   <summary class="formulation__advanced-summary">
-                    <span class="formulation__advanced-chevron" aria-hidden="true">
-                      <svg
-                        class="formulation__advanced-chevron-svg"
-                        width="10"
-                        height="10"
-                        viewBox="0 0 10 10"
-                        focusable="false"
+                    <div
+                      class="formulation__advanced-summary-simple"
+                      id="formulationAdvancedSimple"
+                    >
+                      <span
+                        class="formulation__advanced-simple-label"
+                        id="formulationSimpleThcLabel"
                       >
-                        <polygon points="2,1 9,5 2,9" fill="currentColor" />
-                      </svg>
+                        <em>Maximum</em> THC
+                      </span>
+                      <div
+                        class="formulation__thc-preset-group"
+                        role="radiogroup"
+                        aria-labelledby="formulationSimpleThcLabel"
+                      >
+                        <label class="formulation__thc-preset">
+                          <input
+                            type="radio"
+                            name="formulationThcPreset"
+                            value="0"
+                          />
+                          <span class="formulation__thc-preset-text">None</span>
+                        </label>
+                        <label class="formulation__thc-preset">
+                          <input
+                            type="radio"
+                            name="formulationThcPreset"
+                            value="3"
+                            checked
+                          />
+                          <span class="formulation__thc-preset-text">Entourage effect</span>
+                        </label>
+                        <label class="formulation__thc-preset">
+                          <input
+                            type="radio"
+                            name="formulationThcPreset"
+                            value="20"
+                          />
+                          <span class="formulation__thc-preset-text">Unbounded</span>
+                        </label>
+                      </div>
+                    </div>
+                    <span class="formulation__advanced-summary-toggle">
+                      <span class="formulation__advanced-title">Advanced</span>
+                      <span class="formulation__advanced-chevron" aria-hidden="true">
+                        <svg
+                          class="formulation__advanced-chevron-svg"
+                          width="10"
+                          height="10"
+                          viewBox="0 0 10 10"
+                          focusable="false"
+                        >
+                          <polygon points="2,1 9,5 2,9" fill="currentColor" />
+                        </svg>
+                      </span>
                     </span>
-                    <span class="formulation__advanced-title">Advanced</span>
                   </summary>
                   <div class="formulation__advanced-body">
-                    <div class="formulation__thc-slider-row">
+                    <div class="formulation__advanced-sliders">
+                      <div class="formulation__thc-slider-row">
                       <div
                         class="percent-slider-block"
                         role="group"
@@ -524,7 +569,7 @@
                           class="percent-slider-block__label"
                           id="formulationPercentLabel"
                         >
-                          Maximum THC
+                          <em>Maximum</em> THC
                         </span>
                         <div
                           id="formulationThcSlider"
@@ -546,7 +591,7 @@
                           data-tick-label-size="0.62rem"
                           data-tick-label-rotate="25"
                           data-knob-style="house-inverted"
-                          data-value="6"
+                          data-value="3"
                           data-value-min="20"
                           data-value-max="20"
                           data-tick-custom='[
@@ -585,18 +630,18 @@
                           </div>
                         </div>
                       </div>
-                    </div>
-                    <div class="formulation__thc-slider-row">
+                      </div>
+                      <div class="formulation__thc-slider-row">
                       <div
                         class="percent-slider-block"
                         role="group"
                         aria-labelledby="formulationCbdPercentLabel"
                       >
                         <span
-                          class="percent-slider-block__label"
+                          class="percent-slider-block__label formulation__cbd-label"
                           id="formulationCbdPercentLabel"
                         >
-                          Minimum CBD
+                          <em>Minimum</em> CBD
                         </span>
                         <div
                           id="formulationCbdSlider"
@@ -655,6 +700,7 @@
                             </div>
                           </div>
                         </div>
+                      </div>
                       </div>
                     </div>
                   </div>

@@ -355,6 +355,94 @@
         /* ignore storage failures */
       }
     });
+
+    function wireFormulationAdvancedSimpleThc() {
+      const simple = document.getElementById("formulationAdvancedSimple");
+      const thcRoot = document.getElementById("formulationThcSlider");
+      const cbdRoot = document.getElementById("formulationCbdSlider");
+      if (!simple || !thcRoot || !cbdRoot) {
+        return;
+      }
+      if (typeof window.initPercentSliders === "function" && !thcRoot.percentSlider) {
+        window.initPercentSliders(document);
+      }
+      const thcApi = thcRoot.percentSlider;
+      const cbdApi = cbdRoot.percentSlider;
+      if (!thcApi || !cbdApi) {
+        return;
+      }
+
+      const PRESETS = [0, 3, 20];
+
+      function nearestPreset(v) {
+        let best = PRESETS[0];
+        let bestDist = Math.abs(v - best);
+        for (let i = 1; i < PRESETS.length; i++) {
+          const p = PRESETS[i];
+          const d = Math.abs(v - p);
+          if (d < bestDist) {
+            best = p;
+            bestDist = d;
+          }
+        }
+        return best;
+      }
+
+      function syncRadiosFromThc() {
+        const val = thcApi.getValue();
+        if (typeof val !== "number" || !Number.isFinite(val)) {
+          return;
+        }
+        const preset = PRESETS.includes(val) ? val : nearestPreset(val);
+        const radio = simple.querySelector(
+          'input[name="formulationThcPreset"][value="' + preset + '"]'
+        );
+        if (radio) {
+          radio.checked = true;
+        }
+      }
+
+      function applyPreset(preset) {
+        thcApi.setValue(preset);
+        cbdApi.setValue(10);
+      }
+
+      function onSimplePointerDown(ev) {
+        ev.stopPropagation();
+      }
+
+      simple.addEventListener("mousedown", onSimplePointerDown, true);
+      simple.addEventListener("click", onSimplePointerDown, true);
+
+      simple.addEventListener("change", function (ev) {
+        const t = ev.target;
+        if (
+          t &&
+          /** @type {HTMLElement} */ (t).getAttribute("name") === "formulationThcPreset" &&
+          /** @type {HTMLInputElement} */ (t).type === "radio"
+        ) {
+          const v = Number(/** @type {HTMLInputElement} */ (t).value);
+          if (PRESETS.includes(v)) {
+            applyPreset(v);
+          }
+        }
+      });
+
+      advanced.addEventListener("toggle", function () {
+        if (!advanced.open) {
+          const raw = thcApi.getValue();
+          if (typeof raw === "number" && Number.isFinite(raw)) {
+            const preset = nearestPreset(raw);
+            thcApi.setValue(preset);
+          }
+          syncRadiosFromThc();
+        }
+      });
+
+      syncRadiosFromThc();
+    }
+
+    setTimeout(wireFormulationAdvancedSimpleThc, 0);
   }
 
   function initTemplatePage() {
