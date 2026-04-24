@@ -39,11 +39,10 @@ body {
 
 .app-shell__logo {
   flex-shrink: 0;
-  width: 1.35rem;
-  height: 1.35rem;
-  background: #2e7d32;
-  border-radius: 0 70% 0 70%;
-  transform: rotate(-35deg);
+  display: block;
+  height: clamp(1.35rem, 3vw + 0.85rem, 1.85rem);
+  width: auto;
+  object-fit: contain;
 }
 
 .app-shell__title {
@@ -53,6 +52,13 @@ body {
   letter-spacing: -0.02em;
   line-height: 1.25;
   color: #263238;
+}
+
+.app-shell__title sup {
+  font-size: 0.45em;
+  font-weight: 600;
+  line-height: 0;
+  vertical-align: super;
 }
 
 .app-shell__main {
