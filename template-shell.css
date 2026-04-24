@@ -139,7 +139,7 @@ body {
 
 .formulation__advanced-summary {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem 1rem;
   width: 100%;
@@ -189,6 +189,10 @@ body {
   font-size: 0.78rem;
   font-weight: 600;
   color: #37474f;
+  box-sizing: border-box;
+  padding: 0.35rem 0.55rem 0.35rem 0.45rem;
+  background: #fff;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
 .formulation__thc-preset + .formulation__thc-preset {
@@ -197,38 +201,54 @@ body {
 
 .formulation__thc-preset input {
   flex-shrink: 0;
-  margin: 0 0 0 0.45rem;
+  margin: 0;
   accent-color: #1565c0;
 }
 
 .formulation__thc-preset-text {
   display: block;
-  padding: 0.35rem 0.55rem 0.35rem 0;
+  padding: 0;
   line-height: 1.25;
-  background: #fff;
-  transition: background 0.12s ease, color 0.12s ease;
+  background: transparent;
 }
 
-.formulation__thc-preset:hover .formulation__thc-preset-text {
+.formulation__thc-preset:hover:not(:has(input:checked)) {
   background: #eceff1;
 }
 
-.formulation__thc-preset input:focus-visible ~ .formulation__thc-preset-text {
-  outline: 2px solid #0097a7;
-  outline-offset: 1px;
-}
-
-.formulation__thc-preset input:checked ~ .formulation__thc-preset-text {
+.formulation__thc-preset:has(input:checked) {
   background: #e3f2fd;
   color: #0d47a1;
 }
 
+.formulation__thc-preset:has(input:focus-visible) {
+  outline: 2px solid #0097a7;
+  outline-offset: 1px;
+  position: relative;
+  z-index: 1;
+}
+
+.formulation__thc-preset-note {
+  margin: 0.5rem 0 0;
+  max-width: 42rem;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.8125rem;
+  font-style: italic;
+  line-height: 1.45;
+  color: #424242;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+}
+
 .formulation__advanced-summary-toggle {
   flex: 0 0 auto;
+  align-self: flex-start;
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
   margin-left: auto;
+  padding-top: 0.1rem;
   cursor: pointer;
   color: #595959;
 }
@@ -254,7 +274,7 @@ body {
   color: #595959;
   line-height: 0;
   transform: rotate(0deg);
-  transition: transform 0.2s ease;
+  transition: transform 0.22s ease;
 }
 
 .formulation__advanced[open] .formulation__advanced-chevron {
@@ -274,6 +294,36 @@ body {
 .formulation__advanced-body {
   padding: 0 0.75rem 2.1rem;
   container-type: inline-size;
+  overflow: hidden;
+  max-height: 48rem;
+  opacity: 1;
+  transition:
+    max-height 0.22s ease-out,
+    opacity 0.18s ease-out,
+    padding-top 0.22s ease-out,
+    padding-bottom 0.22s ease-out,
+    padding-left 0.22s ease-out,
+    padding-right 0.22s ease-out;
+}
+
+.formulation__advanced:not([open]) > .formulation__advanced-body {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 0;
+  padding-right: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .formulation__advanced-body {
+    transition: none;
+  }
+
+  .formulation__advanced-chevron {
+    transition: none;
+  }
 }
 
 .formulation__advanced-sliders {
