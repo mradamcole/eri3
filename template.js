@@ -332,44 +332,29 @@
     });
   }
 
-  const FORMULATION_THC_MSG_ZERO =
-    "Clinical note: THC-free products may be appropriate for patients avoiding psychoactive effects. However, evidence suggests that small amounts of THC can enhance or modify the effects of other cannabinoids ('entourage effect').";
-
-  const FORMULATION_THC_MSG_HIGH =
-    "Higher THC levels may increase the risk of adverse effects, including anxiety, dizziness, cognitive impairment, and sedation. Consider whether a lower THC dose or inclusion of CBD may better support tolerability, especially for cannabis-naïve or sensitive patients.";
-
-  function initFormulationThcNote() {
-    const slider = document.getElementById("formulationThcSlider");
-    const note = document.getElementById("formulationThcNote");
-    const exposure = document.querySelector(
-      'input[name="ccChar"][value="cannabinoid_exposure"]'
-    );
-    if (!slider || !note || !exposure) return;
-
-    function readSliderPercent() {
-      const input = slider.querySelector("[data-slider-input]");
-      if (!input) return Number.NaN;
-      const n = Number(String(input.value).trim());
-      return Number.isFinite(n) ? n : Number.NaN;
-    }
-
-    function refreshFormulationThcNote() {
-      const v = readSliderPercent();
-      if (!Number.isFinite(v)) {
-        note.textContent = "";
-        return;
+  function initFormulationAdvancedDisclosure() {
+    const advanced = document.getElementById("formulationAdvanced");
+    if (!advanced) return;
+    const storageKey = "eri.formulation.advanced.open";
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored === "1") {
+        advanced.open = true;
+      } else if (stored === "0") {
+        advanced.open = false;
+      } else {
+        advanced.open = false;
       }
-      if (v === 0) {
-        note.textContent = FORMULATION_THC_MSG_ZERO;
-        return;
-      }
-      const threshold = exposure.checked ? 10 : 5;
-      note.textContent = v > threshold ? FORMULATION_THC_MSG_HIGH : "";
+    } catch (e) {
+      advanced.open = false;
     }
-
-    slider.addEventListener("percent-slider-change", refreshFormulationThcNote);
-    exposure.addEventListener("change", refreshFormulationThcNote);
-    queueMicrotask(refreshFormulationThcNote);
+    advanced.addEventListener("toggle", function () {
+      try {
+        localStorage.setItem(storageKey, advanced.open ? "1" : "0");
+      } catch (e) {
+        /* ignore storage failures */
+      }
+    });
   }
 
   function initTemplatePage() {
@@ -377,7 +362,7 @@
     initEvidenceCard();
     initFormulationFormatSelect();
     initFormulationCannabinoidSelect();
-    initFormulationThcNote();
+    initFormulationAdvancedDisclosure();
   }
 
   if (document.readyState === "loading") {

@@ -143,6 +143,19 @@
               <input id="cfgColor" type="color" value="#8b0000" />
             </label>
             <label class="demo__field">
+              Single extreme label mode
+              <select id="cfgSingleExtremeLabelMode">
+                <option value="none" selected>none</option>
+                <option value="max-infinity">max-infinity</option>
+                <option value="min-infinity">min-infinity</option>
+                <option value="both-infinity">both-infinity</option>
+              </select>
+            </label>
+            <label class="demo__field">
+              Single extreme label symbol
+              <input id="cfgSingleExtremeLabelSymbol" type="text" value="∞" />
+            </label>
+            <label class="demo__field">
               Rail color
               <input id="cfgTrackColor" type="color" value="#3a3a3a" />
             </label>
@@ -175,11 +188,11 @@
               </select>
             </label>
             <label class="demo__field">
-              Minor tick interval (%)
+              Minor tick interval (value units)
               <input id="cfgTickMinor" type="number" value="5" min="0" />
             </label>
             <label class="demo__field">
-              Major tick interval (%)
+              Major tick interval (value units)
               <input id="cfgTickMajor" type="number" value="10" min="0" />
             </label>
             <label class="demo__field">
@@ -201,12 +214,12 @@
               <input id="cfgTickLabelRotate" type="number" value="0" />
             </label>
             <label class="demo__field">
-              Custom ticks JSON (value 0..1)
+              Custom ticks JSON (value in slider scale)
               <textarea id="cfgTickCustom">[
   { "value": 0, "label": "no THC" },
-  { "value": 0.3, "label": "entourage effect" },
-  { "value": 0.1, "label": "regular recreational" },
-  { "value": 0.6, "label": "frequent recreational"}
+  { "value": 5, "label": "entourage effect" },
+  { "value": 10, "label": "regular recreational" },
+  { "value": 20, "label": "frequent recreational"}
 ]</textarea>
             </label>
             <p class="demo__hint" id="cfgTickCustomFeedback">
@@ -265,6 +278,8 @@
               valueMin: s.valueMin,
               valueMax: s.valueMax,
               fillEnabled: s.fillEnabled,
+              singleExtremeLabelMode: s.singleExtremeLabelMode,
+              singleExtremeLabelSymbol: s.singleExtremeLabelSymbol,
               fillColor: s.fillColor,
               trackColor: s.trackColor,
               trackStyle: s.trackStyle,
@@ -284,6 +299,8 @@
               "data-step": String(s.step),
               "data-range": isRange ? "true" : "false",
               "data-fill": s.fillEnabled ? "true" : "false",
+              "data-single-extreme-label-mode": s.singleExtremeLabelMode,
+              "data-single-extreme-label-symbol": s.singleExtremeLabelSymbol,
               "data-fill-color": s.fillColor,
               "data-track-color": s.trackColor,
               "data-track-style": s.trackStyle,
@@ -311,6 +328,12 @@
           var valueMin = Number(document.getElementById("cfgValueMin").value);
           var valueMax = Number(document.getElementById("cfgValueMax").value);
           var fillEnabled = document.getElementById("cfgFillEnabled").checked;
+          var singleExtremeLabelMode = document.getElementById(
+            "cfgSingleExtremeLabelMode"
+          ).value;
+          var singleExtremeLabelSymbol = document
+            .getElementById("cfgSingleExtremeLabelSymbol")
+            .value.trim();
           var fillColor = document.getElementById("cfgColor").value;
           var trackColor = document.getElementById("cfgTrackColor").value;
           var trackStyle = document.getElementById("cfgTrackStyle").value;
@@ -350,6 +373,13 @@
             valueMin: Number.isFinite(valueMin) ? valueMin : 0,
             valueMax: Number.isFinite(valueMax) ? valueMax : 100,
             fillEnabled: fillEnabled,
+            singleExtremeLabelMode:
+              singleExtremeLabelMode === "max-infinity" ||
+              singleExtremeLabelMode === "min-infinity" ||
+              singleExtremeLabelMode === "both-infinity"
+                ? singleExtremeLabelMode
+                : "none",
+            singleExtremeLabelSymbol: singleExtremeLabelSymbol || "∞",
             fillColor: fillColor || "#8b0000",
             trackColor: trackColor || "#3a3a3a",
             trackStyle: trackStyle || "standard",
@@ -412,7 +442,7 @@
 
           var fieldSingleMarkup =
             '<div class="percent-slider__field">' +
-            '<input type="number" class="percent-slider__input" data-slider-input aria-labelledby="demoSliderLabel" />' +
+            '<input type="text" inputmode="decimal" class="percent-slider__input" data-slider-input aria-labelledby="demoSliderLabel" />' +
             '<span class="percent-slider__suffix">%</span>' +
             "</div>";
 
@@ -455,6 +485,10 @@
             (isRange ? "true" : "false") +
             '" data-fill="' +
             (s.fillEnabled ? "true" : "false") +
+            '" data-single-extreme-label-mode="' +
+            s.singleExtremeLabelMode +
+            '" data-single-extreme-label-symbol="' +
+            s.singleExtremeLabelSymbol +
             '" data-fill-color="' +
             s.fillColor +
             '" data-track-color="' +

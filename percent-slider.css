@@ -219,6 +219,10 @@
   transition: width 0.05s ease-out;
 }
 
+.percent-slider--fill-right .percent-slider__fill {
+  border-radius: 0 999px 999px 0;
+}
+
 .percent-slider--range .percent-slider__fill {
   border-radius: 999px;
 }

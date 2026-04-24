@@ -102,11 +102,6 @@ body {
   margin-bottom: 0.25rem;
 }
 
-.formulation .formulation__cannabinoids + .formulation__thc-slider-row .percent-slider-block {
-  margin-top: 0;
-  padding-top: 12px;
-}
-
 .formulation .percent-slider-block__label {
   margin-bottom: calc(0.5rem - 10px);
   margin-right: 6px;
@@ -128,16 +123,74 @@ body {
   max-width: min(100%, 28rem);
 }
 
-.formulation__thc-note {
-  flex: 1 1 200px;
-  min-width: min(100%, 200px);
-  margin: 30px 0 0;
-  font-size: 0.8125rem;
-  font-style: italic;
-  line-height: 1.45;
-  color: #424242;
-  background: none;
-  border: none;
+.formulation__advanced {
+  margin-top: 0.75rem;
+  border: 1px solid #d5d5d5;
+  border-radius: 8px;
+  background: #fcfcfc;
+  overflow: hidden;
+}
+
+.formulation__advanced-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  padding: 0.6rem 0.75rem;
+}
+
+.formulation__advanced-summary::-webkit-details-marker {
+  display: none;
+}
+
+.formulation__advanced-summary:focus {
+  outline: none;
+}
+
+.formulation__advanced-summary:focus-visible {
+  outline: 2px solid #0097a7;
+  outline-offset: -2px;
+}
+
+.formulation__advanced-chevron {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #595959;
+  line-height: 0;
+  transform: rotate(0deg);
+  transition: transform 0.2s ease;
+}
+
+.formulation__advanced[open] .formulation__advanced-chevron {
+  transform: rotate(90deg);
+}
+
+.formulation__advanced-chevron-svg {
+  display: block;
+}
+
+.formulation__advanced-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #37474f;
+}
+
+.formulation__advanced-body {
+  padding: 0 0.75rem 0.5rem;
+}
+
+.formulation__advanced-body .formulation__thc-slider-row + .formulation__thc-slider-row {
+  margin-top: 0.25rem;
+}
+
+.formulation .formulation__advanced-body .formulation__thc-slider-row .percent-slider-block {
+  margin-top: 0.1rem;
 }
 
 .formulation .percent-slider {
