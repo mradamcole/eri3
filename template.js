@@ -314,6 +314,7 @@
       selectAllButton: true,
       clearAllButton: true,
       selectAllSingleClickGroupIndexes: [0],
+      defaultSelectedGroupIndexes: [0],
     });
   }
 
@@ -329,6 +330,7 @@
       selectAllButton: true,
       clearAllButton: true,
       selectAllSingleClickGroupIndexes: [0],
+      defaultSelectedGroupIndexes: [0],
     });
   }
 
@@ -413,6 +415,12 @@
 
       simple.addEventListener("mousedown", onSimplePointerDown, true);
       simple.addEventListener("click", onSimplePointerDown, true);
+
+      const presetNote = document.getElementById("formulationThcPresetNote");
+      if (presetNote) {
+        presetNote.addEventListener("mousedown", onSimplePointerDown, true);
+        presetNote.addEventListener("click", onSimplePointerDown, true);
+      }
 
       simple.addEventListener("change", function (ev) {
         const t = ev.target;

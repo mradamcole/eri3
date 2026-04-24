@@ -210,6 +210,50 @@
   }
 
   /**
+   * Divider-delimited groups: rows before the first divider are group 0; if the first row is a
+   * divider, data rows after it are still group 0 until the next divider (same as
+   * getVisibleDataIdsForGroups).
+   * @param {TmsdNormalizedRow[]} model
+   * @param {number[]} groupIndexes
+   * @returns {string[]}
+   */
+  function getDataRowIdsForGroupIndexes(model, groupIndexes) {
+    if (!groupIndexes.length) {
+      return [];
+    }
+    /** @type {Record<string, boolean>} */
+    var allowed = {};
+    var i;
+    for (i = 0; i < groupIndexes.length; i++) {
+      allowed[String(groupIndexes[i])] = true;
+    }
+    /** @type {string[]} */
+    var ids = [];
+    var currentGroupIndex = 0;
+    var hasSeenAnyData = false;
+    var hasSeenDataSinceLastDivider = false;
+    var k;
+    for (k = 0; k < model.length; k++) {
+      if (model[k].kind === "divider") {
+        if (hasSeenAnyData && hasSeenDataSinceLastDivider) {
+          currentGroupIndex += 1;
+          hasSeenDataSinceLastDivider = false;
+        }
+        continue;
+      }
+      if (model[k].kind !== "data") {
+        continue;
+      }
+      hasSeenAnyData = true;
+      hasSeenDataSinceLastDivider = true;
+      if (allowed[String(currentGroupIndex)]) {
+        ids.push(model[k].id);
+      }
+    }
+    return ids;
+  }
+
+  /**
    * @param {object} options
    * @param {{ label: string, sortable?: boolean, sortOrder?: string[] }[]} options.columns
    * @param {unknown[]} options.rows
@@ -222,6 +266,7 @@
    * @param {boolean} [options.selectAllButton]
    * @param {boolean} [options.clearAllButton]
    * @param {number[]} [options.selectAllSingleClickGroupIndexes]
+   * @param {number[]} [options.defaultSelectedGroupIndexes]
    * @returns {{ destroy: function (): void, getValue: function (): { id: string, cells: string[] }[], setValue: function (ids: string[]): void, open: function (): void, close: function (): void, root: HTMLElement }}
    */
   function create(container, options) {
@@ -304,6 +349,29 @@
         selectAllSingleClickGroupIndexes = normalizedGroupIndexes;
       }
     }
+    var rawDefaultSelectedGroupIndexes = Array.isArray(options.defaultSelectedGroupIndexes)
+      ? options.defaultSelectedGroupIndexes
+      : null;
+    /** @type {number[] | null} */
+    var defaultSelectedGroupIndexes = null;
+    if (rawDefaultSelectedGroupIndexes && rawDefaultSelectedGroupIndexes.length) {
+      /** @type {number[]} */
+      var normalizedDefaultGroupIndexes = [];
+      var gd;
+      for (gd = 0; gd < rawDefaultSelectedGroupIndexes.length; gd++) {
+        var parsedDefaultGroup = Number(rawDefaultSelectedGroupIndexes[gd]);
+        if (
+          Number.isInteger(parsedDefaultGroup) &&
+          parsedDefaultGroup >= 0 &&
+          normalizedDefaultGroupIndexes.indexOf(parsedDefaultGroup) === -1
+        ) {
+          normalizedDefaultGroupIndexes.push(parsedDefaultGroup);
+        }
+      }
+      if (normalizedDefaultGroupIndexes.length) {
+        defaultSelectedGroupIndexes = normalizedDefaultGroupIndexes;
+      }
+    }
     var showBulk = selectAllButtonEnabled || clearAllButtonEnabled;
     var pendingSelectAllSingleClickTimer = null;
 
@@ -354,6 +422,16 @@
 
     /** @type {Set<string>} */
     var selected = new Set();
+    if (multiple && defaultSelectedGroupIndexes && defaultSelectedGroupIndexes.length) {
+      var initialGroupIds = getDataRowIdsForGroupIndexes(model, defaultSelectedGroupIndexes);
+      var ini;
+      for (ini = 0; ini < initialGroupIds.length; ini++) {
+        if (selected.size >= maxSelections) {
+          break;
+        }
+        selected.add(initialGroupIds[ini]);
+      }
+    }
     var open = false;
     var filterQuery = "";
     /** @type {string | null} */
@@ -590,36 +668,14 @@
      * @returns {string[]}
      */
     function getVisibleDataIdsForGroups(groupIndexes) {
-      if (!groupIndexes.length) {
-        return [];
-      }
-      /** @type {Record<string, boolean>} */
-      var allowed = {};
-      var i;
-      for (i = 0; i < groupIndexes.length; i++) {
-        allowed[String(groupIndexes[i])] = true;
-      }
+      var candidateIds = getDataRowIdsForGroupIndexes(model, groupIndexes);
       /** @type {string[]} */
       var ids = [];
-      var currentGroupIndex = 0;
-      var hasSeenAnyData = false;
-      var hasSeenDataSinceLastDivider = false;
-      var k;
-      for (k = 0; k < model.length; k++) {
-        if (model[k].kind === "divider") {
-          if (hasSeenAnyData && hasSeenDataSinceLastDivider) {
-            currentGroupIndex += 1;
-            hasSeenDataSinceLastDivider = false;
-          }
-          continue;
-        }
-        if (!model[k].tr || model[k].tr.hidden) {
-          continue;
-        }
-        hasSeenAnyData = true;
-        hasSeenDataSinceLastDivider = true;
-        if (allowed[String(currentGroupIndex)]) {
-          ids.push(model[k].id);
+      var ci;
+      for (ci = 0; ci < candidateIds.length; ci++) {
+        var dr = getDataRowById(candidateIds[ci]);
+        if (dr && dr.tr && !dr.tr.hidden) {
+          ids.push(candidateIds[ci]);
         }
       }
       return ids;
